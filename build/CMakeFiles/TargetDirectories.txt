@@ -1,0 +1,4 @@
+/home/edu20056/Desktop/TEC/I semestre 2025/Datos2/Proyecto1 Datos 2/build/CMakeFiles/protolib.dir
+/home/edu20056/Desktop/TEC/I semestre 2025/Datos2/Proyecto1 Datos 2/build/CMakeFiles/server.dir
+/home/edu20056/Desktop/TEC/I semestre 2025/Datos2/Proyecto1 Datos 2/build/CMakeFiles/edit_cache.dir
+/home/edu20056/Desktop/TEC/I semestre 2025/Datos2/Proyecto1 Datos 2/build/CMakeFiles/rebuild_cache.dir

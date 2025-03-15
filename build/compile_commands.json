@@ -1,0 +1,20 @@
+[
+{
+  "directory": "/home/edu20056/Desktop/TEC/I semestre 2025/Datos2/Proyecto1 Datos 2/build",
+  "command": "/usr/bin/c++ -DCARES_STATICLIB -I\"/home/edu20056/Desktop/TEC/I semestre 2025/Datos2/Proyecto1 Datos 2/build\"  -o CMakeFiles/protolib.dir/proto/hello.pb.cc.o -c \"/home/edu20056/Desktop/TEC/I semestre 2025/Datos2/Proyecto1 Datos 2/build/proto/hello.pb.cc\"",
+  "file": "/home/edu20056/Desktop/TEC/I semestre 2025/Datos2/Proyecto1 Datos 2/build/proto/hello.pb.cc",
+  "output": "CMakeFiles/protolib.dir/proto/hello.pb.cc.o"
+},
+{
+  "directory": "/home/edu20056/Desktop/TEC/I semestre 2025/Datos2/Proyecto1 Datos 2/build",
+  "command": "/usr/bin/c++ -DCARES_STATICLIB -I\"/home/edu20056/Desktop/TEC/I semestre 2025/Datos2/Proyecto1 Datos 2/build\"  -o CMakeFiles/protolib.dir/proto/hello.grpc.pb.cc.o -c \"/home/edu20056/Desktop/TEC/I semestre 2025/Datos2/Proyecto1 Datos 2/build/proto/hello.grpc.pb.cc\"",
+  "file": "/home/edu20056/Desktop/TEC/I semestre 2025/Datos2/Proyecto1 Datos 2/build/proto/hello.grpc.pb.cc",
+  "output": "CMakeFiles/protolib.dir/proto/hello.grpc.pb.cc.o"
+},
+{
+  "directory": "/home/edu20056/Desktop/TEC/I semestre 2025/Datos2/Proyecto1 Datos 2/build",
+  "command": "/usr/bin/c++ -DCARES_STATICLIB -I\"/home/edu20056/Desktop/TEC/I semestre 2025/Datos2/Proyecto1 Datos 2/build\"  -o CMakeFiles/server.dir/src/server.cc.o -c \"/home/edu20056/Desktop/TEC/I semestre 2025/Datos2/Proyecto1 Datos 2/src/server.cc\"",
+  "file": "/home/edu20056/Desktop/TEC/I semestre 2025/Datos2/Proyecto1 Datos 2/src/server.cc",
+  "output": "CMakeFiles/server.dir/src/server.cc.o"
+}
+]
