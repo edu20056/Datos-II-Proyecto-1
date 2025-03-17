@@ -1,0 +1,15 @@
+syntax = "proto3";
+
+package param;
+
+service MemoryManagerService {
+    rpc MPointerOperation (MPointerRequest) returns (MemoryManagerReply);
+}
+
+message MPointerRequest {
+    string message = 1;
+}
+
+message MemoryManagerReply {
+    string message = 1;
+}
