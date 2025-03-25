@@ -6,7 +6,10 @@
 #include <vector>
 #include <thread>
 
-void handle_client(int client_socket, int client_number) {
+#include "Bloque.h"
+#include "Manager.h"
+
+void handle_client(int client_socket, int client_number, Manager manager) {
     char buffer[1024] = {0};
     int read_size;
 
@@ -15,8 +18,11 @@ void handle_client(int client_socket, int client_number) {
         std::cout << "Mensaje recibido de Cliente " << client_number << ": " 
                   << buffer << std::endl;
         
+        // Enviar mensaje a manager y recibir respuesta
+        int respuesta_manager = manager.ReceiveMessage(buffer);
+
         // Responder al cliente con un mensaje de confirmación
-        std::string response = "Recibimos tu mensaje, Cliente " + std::to_string(client_number);
+        std::string response = "Recibimos tu mensaje, Cliente " + std::to_string(client_number) + ", Ademas" + to_string(respuesta_manager);
         send(client_socket, response.c_str(), response.length(), 0);
 
         // Limpiar el buffer para el próximo mensaje
@@ -40,10 +46,13 @@ int main() {
 
     std::cout << "Ingresa el puerto del servidor: ";
     std::cin >> server_port;
-    std::cout << "Ingresa un número adicional (int): ";
+    std::cout << "Ingresa la cantidad de MB por reservar: ";
     std::cin >> additional_num;
     std::cout << "Ingresa la carpeta del servidor: ";
     std::cin >> folder;
+
+    // Crear Ojeto manager para Memory Manager
+    Manager manager(additional_num * 1024 * 1024);
 
     // Crear el socket del servidor
     int server_socket = socket(AF_INET, SOCK_STREAM, 0);
@@ -90,7 +99,7 @@ int main() {
                   << ntohs(client_address.sin_port) << std::endl;
 
         // Crear un hilo para manejar al cliente
-        std::thread client_thread(handle_client, client_socket, client_counter);
+        std::thread client_thread(handle_client, client_socket, client_counter, manager);
         client_thread.detach();  // Desprender el hilo para que se ejecute independientemente
 
         client_counter++;
