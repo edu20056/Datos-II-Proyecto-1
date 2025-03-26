@@ -16,9 +16,20 @@ using namespace MemoryManager;
 class Manager {
 private:
     void* memory_amount;
+    void* last_address;
+    vector<MemoryBlock> blks;    
 
     void Create(int size, string type) {
-        cout << "Create llamado con size: " << size << " y type: " << type << endl;
+
+        if (blks.empty()){
+            MemoryBlock memBlk;
+            memBlk.frstPtr = memory_amount;
+            memBlk.lastPtr = (void*)((char*)memBlk.frstPtr + (size * sizeof(int)));
+
+            blks.push_back(memBlk);
+            cout << "Create llamado con size: " << size << " y type: " << type << endl;
+            printMemoryBlock(memBlk);
+        }
     }
 
     void Set(int id, string value) {
@@ -39,9 +50,18 @@ private:
 
 
 public:
-    Manager (int amount)
-    {
+    Manager (int amount) {
         memory_amount = malloc(amount);
+
+        cout << "1st Adress: " << memory_amount << endl;
+
+        last_address = (void*)((char*)memory_amount + (amount * sizeof(int)));        
+        cout << "Last Adress: " << last_address << endl;
+    }
+
+    ~Manager (){
+        free(memory_amount);
+        cout << "I AM FREE..." << endl;
     }
 
     int ReceiveMessage(string message) { // esta funcion deber retornar un numero que sea la direccion en caso de ser necesario.
@@ -87,6 +107,13 @@ public:
             
         return 0;
         }
+    }
+
+    void printMemoryBlock(const MemoryBlock& block) {
+        cout << "First Pointer Address: " << block.frstPtr << endl;
+        cout << "Last Pointer Address: " << block.lastPtr << endl;
+        cout << "Reference Count: " << block.refCount << endl;
+        cout << "Type: " << block.type << endl;
     }
 
 };
