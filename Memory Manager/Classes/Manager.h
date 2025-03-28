@@ -26,6 +26,7 @@ private:
             MemoryBlock memBlk;
             memBlk.frstPtr = memory_amount;
             memBlk.lastPtr = (void*)((char*)memBlk.frstPtr + (size * sizeof(int)));
+            memBlk.refCount = 0;
             memBlk.type = type;
             memBlk.id = 1;
 
@@ -42,11 +43,13 @@ private:
             // Adding necesary data to new block
             memBlk.frstPtr = nextMemoryUSe;
             memBlk.lastPtr = (void*)((char*)memBlk.frstPtr + (size * sizeof(int)));
+            memBlk.refCount = 0;
             memBlk.id = actuallID;
-                        memBlk.type = type;
+            memBlk.type = type;
             actuallID++;
 
             blks.push_back(memBlk);
+            cout << "Create llamado con size: " << size << " y type: " << type << endl;
             return memBlk.id;
         }
     }
@@ -78,10 +81,29 @@ private:
 
         return -1; // id not found
     }
-
-    void Get(int id) {
-        cout << "Get llamado con id: " << id << endl;
+    
+    std::variant<int, float, std::string> Get(int id) {
+        for (size_t i = 0; i < blks.size(); i++) {
+            if (blks[i].id == id) {
+                void* ptr = blks[i].frstPtr;
+    
+                if (blks[i].type == "int") {
+                    int intValue = *(static_cast<int*>(ptr));
+                    return intValue;  // Retorna el valor de tipo int
+                }
+                else if (blks[i].type == "float") {
+                    float floatValue = *(static_cast<float*>(ptr));
+                    return floatValue;  // Retorna el valor de tipo float
+                }
+                else if (blks[i].type == "string") {
+                    std::string stringValue = *(static_cast<std::string*>(ptr));
+                    return stringValue;  // Retorna el valor de tipo string
+                }
+            }
+        }
+        return -1;  // Si no se encuentra el ID, devuelve error
     }
+    
 
     void IncreaseRefCount(int id) {
         cout << "IncreaseRefCount llamado con id: " << id << endl;
@@ -107,7 +129,7 @@ public:
         cout << "I AM FREE..." << endl;
     }
 
-    int ReceiveMessage(string message) { 
+    std::variant<int, float, std::string> ReceiveMessage(string message) { 
         stringstream ss(message);
         string command;
         getline(ss, command, '(');
@@ -126,14 +148,12 @@ public:
             ss >> id;
             ss.ignore(1); // Ignorar la coma
             getline(ss, value, ')');
-            Set(id, value);
-            return 2;
+            return Set(id, value);
 
         } else if (command == "Get") {
             int id;
             ss >> id;
-            Get(id);
-            return 3;
+            return Get(id);
 
         } else if (command == "IncreaseRefCount") {
             int id;

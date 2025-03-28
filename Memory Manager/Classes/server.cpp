@@ -5,7 +5,7 @@
 #include <arpa/inet.h>
 #include <vector>
 #include <thread>
-
+#include <variant>
 #include "Bloque.h"
 #include "Manager.h"
 
@@ -19,10 +19,28 @@ void handle_client(int client_socket, int client_number, Manager manager) {
                   << buffer << std::endl;
         
         // Enviar mensaje a manager y recibir respuesta
-        int respuesta_manager = manager.ReceiveMessage(buffer);
+        std::variant<int, float, std::string> respuesta_manager = manager.ReceiveMessage(buffer);
+
+
+
+        std::string respuesta_str = std::visit([](auto&& arg) -> std::string {
+            if constexpr (std::is_same_v<std::decay_t<decltype(arg)>, std::string>) {
+                // Si el tipo es std::string, simplemente devolvemos el valor como está
+                return arg;
+            } else {
+                // Para tipos numéricos, usamos std::to_string
+                return std::to_string(arg);
+            }
+        }, respuesta_manager);
+
+        // Si es un string, manejamos el caso por separado
+        if (auto* str_value = std::get_if<std::string>(&respuesta_manager)) {
+            respuesta_str = *str_value; // Si el valor es un string, lo asignamos directamente
+        }
+
 
         // Responder al cliente con un mensaje de confirmación
-        std::string response = "Recibimos tu mensaje, Cliente " + std::to_string(client_number) + ", Ademas" + to_string(respuesta_manager);
+        std::string response = "Recibimos tu mensaje, Cliente " + std::to_string(client_number) + ", Ademas" + respuesta_str;
         send(client_socket, response.c_str(), response.length(), 0);
 
         // Limpiar el buffer para el próximo mensaje
