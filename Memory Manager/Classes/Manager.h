@@ -107,7 +107,7 @@ public:
         cout << "I AM FREE..." << endl;
     }
 
-    int ReceiveMessage(string message) { // esta funcion deber retornar un numero que sea la direccion en caso de ser necesario.
+    int ReceiveMessage(string message) { 
         stringstream ss(message);
         string command;
         getline(ss, command, '(');
@@ -146,8 +146,10 @@ public:
             ss >> id;
             DecreaseRefCount(id);
             return 5;
-            
-        return 0;
+        }
+
+        else {
+            return -1; //Eror
         }
     }
 

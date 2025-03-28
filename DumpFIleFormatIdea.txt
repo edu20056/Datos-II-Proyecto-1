@@ -1,0 +1,12 @@
+id 1: type: string  data: "Hola" size: 40 KB
+id 2: type: int     data: 14     size: 10 KB
+.
+.
+.
+.
+
+id n: type: string  data: "Hola" size: 40 KB
+
+
+MemoryBlockSize: 10 MB
+LeftMemoryForUsage: 5 MB
