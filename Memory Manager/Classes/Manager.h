@@ -11,7 +11,6 @@
 #include <vector>
 
 using namespace std;
-using namespace MemoryManager;
 
 class Manager {
 private:
@@ -25,7 +24,7 @@ private:
         if (blks.empty()){
             MemoryBlock memBlk;
             memBlk.frstPtr = memory_amount;
-            memBlk.lastPtr = (void*)((char*)memBlk.frstPtr + (size * sizeof(int)));
+            memBlk.lastPtr = (void*)((char*)memBlk.frstPtr + (size * sizeof(char)));
             memBlk.refCount = 0;
             memBlk.type = type;
             memBlk.id = 1;
@@ -105,12 +104,29 @@ private:
     }
     
 
-    void IncreaseRefCount(int id) {
-        cout << "IncreaseRefCount llamado con id: " << id << endl;
+    int IncreaseRefCount(int id) {
+        for (size_t i = 0; i < blks.size(); i++) {
+            if (blks[i].id == id) {
+                blks[i].refCount = blks[i].refCount + 1;
+                return blks[i].refCount;
+            }
+        }
+        return -1;  // Si no se encuentra el ID, devuelve error
     }
 
-    void DecreaseRefCount(int id) {
-        cout << "DecreaseRefCount llamado con id: " << id << endl;
+    int DecreaseRefCount(int id) {
+        for (size_t i = 0; i < blks.size(); i++) {
+            if (blks[i].id == id) {
+                if ( blks[i].refCount != 0)
+                {
+                    blks[i].refCount = blks[i].refCount - 1;
+                    return blks[i].refCount;
+                }
+
+                return 0;
+            }
+        }
+        return -1;  // Si no se encuentra el ID, devuelve error
     }
 
 
@@ -158,18 +174,16 @@ public:
         } else if (command == "IncreaseRefCount") {
             int id;
             ss >> id;
-            IncreaseRefCount(id);
-            return 4;
+            return IncreaseRefCount(id);
 
         } else if (command == "DecreaseRefCount") {
             int id;
             ss >> id;
-            DecreaseRefCount(id);
-            return 5;
+            return DecreaseRefCount(id);
         }
 
         else {
-            return -1; //Eror
+            return -1; //Error
         }
     }
 

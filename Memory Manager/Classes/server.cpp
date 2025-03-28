@@ -33,12 +33,6 @@ void handle_client(int client_socket, int client_number, Manager manager) {
             }
         }, respuesta_manager);
 
-        // Si es un string, manejamos el caso por separado
-        if (auto* str_value = std::get_if<std::string>(&respuesta_manager)) {
-            respuesta_str = *str_value; // Si el valor es un string, lo asignamos directamente
-        }
-
-
         // Responder al cliente con un mensaje de confirmación
         std::string response = "Recibimos tu mensaje, Cliente " + std::to_string(client_number) + ", Ademas" + respuesta_str;
         send(client_socket, response.c_str(), response.length(), 0);
