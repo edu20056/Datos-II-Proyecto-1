@@ -12,6 +12,7 @@ struct MemoryBlock{
     void* frstPtr;
     void* lastPtr; 
     int refCount;
+    int id;
     string type;
 };
 

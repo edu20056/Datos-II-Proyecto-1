@@ -15,25 +15,68 @@ using namespace MemoryManager;
 
 class Manager {
 private:
+    int actuallID = 2;
     void* memory_amount;
     void* last_address;
     vector<MemoryBlock> blks;    
 
-    void Create(int size, string type) {
+    int Create(int size, string type) {
 
         if (blks.empty()){
             MemoryBlock memBlk;
             memBlk.frstPtr = memory_amount;
             memBlk.lastPtr = (void*)((char*)memBlk.frstPtr + (size * sizeof(int)));
+            memBlk.type = type;
+            memBlk.id = 1;
 
             blks.push_back(memBlk);
             cout << "Create llamado con size: " << size << " y type: " << type << endl;
             printMemoryBlock(memBlk);
+            return 1;
+        }
+        else {
+            MemoryBlock memBlk;
+            MemoryBlock lastAdded = blks.back();
+            void* nextMemoryUSe = lastAdded.lastPtr;
+
+            // Adding necesary data to new block
+            memBlk.frstPtr = nextMemoryUSe;
+            memBlk.lastPtr = (void*)((char*)memBlk.frstPtr + (size * sizeof(int)));
+            memBlk.id = actuallID;
+                        memBlk.type = type;
+            actuallID++;
+
+            blks.push_back(memBlk);
+            return memBlk.id;
         }
     }
 
-    void Set(int id, string value) {
-        cout << "Set llamado con id: " << id << " y value: " << value << endl;
+    int Set(int id, std::string value) {
+        for (size_t i = 0; i < blks.size(); i++) {
+            if (blks[i].id == id) {
+                void* ptr = blks[i].frstPtr;
+
+                if (blks[i].type == "int") {
+                    int intValue = std::stoi(value);
+                    *static_cast<int*>(ptr) = intValue;
+                }
+                else if (blks[i].type == "float") {
+                    float floatValue = std::stof(value);
+                    *static_cast<float*>(ptr) = floatValue;
+                }
+                else if (blks[i].type == "string") {
+                    *static_cast<std::string*>(ptr) = value;
+                }
+                else {
+                    std::cerr << "Error: Tipo no soportado: " << blks[i].type << std::endl;
+                    return -1;
+                }
+
+                return 0; // success
+            }
+        }
+
+        return -1; // id not found
     }
 
     void Get(int id) {
@@ -75,8 +118,7 @@ public:
             ss >> size;
             ss.ignore(1); // Ignorar la coma
             getline(ss, type, ')');
-            Create(size, type);
-            return 1;
+            return Create(size, type);
 
         } else if (command == "Set") {
             int id;
