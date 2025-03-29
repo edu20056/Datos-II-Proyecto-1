@@ -9,10 +9,24 @@
 #include "Bloque.h"
 #include "Manager.h"
 
+
+
+void RunGarbageCollector(Manager& Manager)
+{
+    while (true)
+    {
+        Manager.GarbageCollector();
+        std::this_thread::sleep_for(std::chrono::seconds(10)); 
+    }
+    
+}
+
 void handle_client(int client_socket, int client_number, Manager manager) {
     char buffer[1024] = {0};
     int read_size;
-
+    
+    std::thread garbageCollectorThread(RunGarbageCollector, std::ref(manager));
+    garbageCollectorThread.detach(); 
     // Bucle para recibir y responder mensajes
     while ((read_size = recv(client_socket, buffer, sizeof(buffer), 0)) > 0) {
         std::cout << "Mensaje recibido de Cliente " << client_number << ": " 
@@ -20,7 +34,6 @@ void handle_client(int client_socket, int client_number, Manager manager) {
         
         // Enviar mensaje a manager y recibir respuesta
         std::variant<int, float, std::string, char, bool, double> respuesta_manager = manager.ReceiveMessage(buffer);
-
 
         std::string respuesta_str = std::visit([](auto&& arg) -> std::string {
             if constexpr (std::is_same_v<std::decay_t<decltype(arg)>, std::string>) {

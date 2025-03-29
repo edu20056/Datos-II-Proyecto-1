@@ -32,7 +32,6 @@ private:
 
             blks.push_back(memBlk);
             cout << "Create llamado con size: " << size << " y type: " << type << endl;
-            printMemoryBlock(memBlk);
             return 1; 
         }
         else {
@@ -190,6 +189,7 @@ private:
     
 
     int IncreaseRefCount(int id) {
+        cout << "Se llamo increase con id: "<< id << endl;
         for (size_t i = 0; i < blks.size(); i++) {
             if (blks[i].id == id) {
                 blks[i].refCount = blks[i].refCount + 1;
@@ -200,6 +200,7 @@ private:
     }
 
     int DecreaseRefCount(int id) {
+        cout << "Se llamo decrease con id: "<< id << endl;
         for (size_t i = 0; i < blks.size(); i++) {
             if (blks[i].id == id) {
                 if ( blks[i].refCount > 0)
@@ -272,26 +273,19 @@ public:
         }
     }
 
-    void printMemoryBlock(const MemoryBlock& block) {
-        cout << "First Pointer Address: " << block.frstPtr << endl;
-        cout << "Last Pointer Address: " << block.lastPtr << endl;
-        cout << "Reference Count: " << block.refCount << endl;
-        cout << "Type: " << block.type << endl;
-    }
-
-
-
     bool GarbageCollector () // Boolean para que si es true cree un DumpFile
     {
         bool changes = false;
-        for (size_t i = 0; i < blks.size(); i++) {
-            if (blks[i].alreadyAssigned && blks[i].refCount <=0) //Si ya le fue asignado valor y tiene referencias cero
-            {
-                MemoryBlock toBeDeleted = blks[i];
+        cout << "Size de vector: " << blks.size() << endl;
+        for (size_t i = blks.size(); i-- > 0; ) { // Recorrer de atrás hacia adelante
+            cout << "Bool de: " << blks[i].id << " Es: " << blks[i].alreadyAssigned << endl;
+            if (blks[i].alreadyAssigned && blks[i].refCount <= 0) {
+                cout << "Se está borrando el id: " << blks[i].id << endl;
                 blks.erase(blks.begin() + i);
                 changes = true;
             }
         }
+        cout << "Estado de recolector de basura: "<< changes << endl;
         return changes;
     }
 
