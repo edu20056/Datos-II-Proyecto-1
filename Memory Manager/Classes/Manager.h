@@ -71,7 +71,7 @@ class Manager {
                 dumpFile << "ID : " << block.id << '\n';
                 dumpFile << "  - First Address : " << block.frstPtr << '\n';
                 dumpFile << "  - Last Address : " << block.lastPtr << '\n';
-                dumpFile << "  - Size : " << (char*)block.lastPtr - (char*)block.frstPtr << '\n';
+                dumpFile << "  - Size :spacio insuficiente, no se puede agregar el bloque " << (char*)block.lastPtr - (char*)block.frstPtr << '\n';
                 dumpFile << "  - Type : " << block.type << '\n';
                 dumpFile << "  - Ref Count : " << block.refCount << '\n';
                 dumpFile << "-------------------------------------------\n\n";
@@ -90,7 +90,7 @@ class Manager {
             memory_amount = malloc(amount);
 
             cout << "1st Adress: " << memory_amount << endl;
-            last_address = (void*)((char*)memory_amount + (amount * sizeof(int)));        
+            last_address = (void*)((char*)memory_amount + amount);       
             cout << "Last Adress: " << last_address << endl;
 
             dumpDir = dir;
@@ -103,54 +103,57 @@ class Manager {
 
         int Create(int size, string type) { 
 
+            // Verifica si la lista de bloques está vacía
             if (blks.empty()){
                 MemoryBlock memBlk;
-                memBlk.frstPtr = memory_amount;
-                memBlk.lastPtr = (void*)((char*)memBlk.frstPtr + (size * sizeof(char)));
+                memBlk.frstPtr = memory_amount; // Primer bloque comienza en la cantidad de memoria disponible
+                memBlk.lastPtr = (void*)((char*)memBlk.frstPtr + (size)); // Agrega tamaño en bytes, no sizeof(char) ya que size es en bytes
                 memBlk.refCount = 0;
                 memBlk.type = type;
                 memBlk.id = 1;
                 memBlk.alreadyAssigned = false;
-
-                blks.push_back(memBlk);
-
+        
+                blks.push_back(memBlk); // Agrega el primer bloque a la lista
+        
                 std::stringstream ss;
                 ss << "Create(" << size << ", " << type << ")\n";
-                dumpFileReport(ss.str());
-
+                dumpFileReport(ss.str()); // Imprime el informe
+        
                 return 1; 
             }
             else {
+                // Si ya hay bloques, toma el último bloque
                 MemoryBlock memBlk;
                 MemoryBlock lastAdded = blks.back();
-                void* nextMemoryUSe = lastAdded.lastPtr;
-
-                void* endOfAllocation = (char*)nextMemoryUSe + size;
-
+                void* nextMemoryUse = lastAdded.lastPtr; // La siguiente memoria empieza donde termina el último bloque
+        
+                // Calcula la dirección final del nuevo bloque de memoria
+                void* endOfAllocation = (char*)nextMemoryUse + size;
+        
                 if (endOfAllocation > last_address)
                 {
-                    return -2; //Espacio de nueva varible excede bloque de memoria de Manager.
+                    return -2; // not enough space
                 }
-
-                // Adding necesary data to new block
-                memBlk.frstPtr = nextMemoryUSe;
-                memBlk.lastPtr = (void*)((char*)memBlk.frstPtr + (size * sizeof(int)));
+        
+                // New memory block configuration
+                memBlk.frstPtr = nextMemoryUse; 
+                memBlk.lastPtr = (void*)((char*)memBlk.frstPtr + size); 
                 memBlk.refCount = 0;
                 memBlk.id = actuallID;
                 memBlk.type = type;
                 memBlk.alreadyAssigned = false;
                 actuallID++;
-
-                blks.push_back(memBlk);
-
+        
+                blks.push_back(memBlk); // Add block to list
+        
                 std::stringstream ss;
                 ss << "Create(" << size << ", " << type << ")\n";
-                dumpFileReport(ss.str());
-
+                dumpFileReport(ss.str()); 
+        
                 return memBlk.id;
             }
         }
-
+        
         int Set(int id, std::string value) {
             cout << "Set llamado con id: " << id << " y value: " << value << endl;
         
