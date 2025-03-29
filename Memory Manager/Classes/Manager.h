@@ -159,11 +159,9 @@ class Manager {
             else {
                 int indexSpace = findSufficientSpace(size); 
                 if ( indexSpace < 0){
-
                     MemoryBlock memBlk;
                     int largeID = getHighestLastPtrID(blks);
-                    MemoryBlock lastAdded = blks[largeID];
-
+                    MemoryBlock lastAdded = blks[largeID - 1];
                     void* nextMemoryUse = lastAdded.lastPtr; // La siguiente memoria empieza donde termina el último bloque
             
                     // Calcula la dirección final del nuevo bloque de memoria
@@ -193,9 +191,32 @@ class Manager {
                 }
                 else{
                     MemoryBlock memBlk;
+                    memBlk.frstPtr = freeSpace[indexSpace][0]; 
+                    memBlk.lastPtr = (void*)((char*)memBlk.frstPtr + size); 
+                    memBlk.id = actuallID;
+                    memBlk.refCount = 0;
+                    memBlk.type = type;
+                    memBlk.alreadyAssigned = false;
+                    actuallID++;
+                    
+                    if ((char*)memBlk.lastPtr - (char*)memBlk.frstPtr == size) //if new blocks size is equals to freeSpace[i] space
+                    {
+                        freeSpace.erase(freeSpace.begin() + indexSpace);
+                    }
+                    
 
-                    return 0;
+                    blks.push_back(memBlk); // Add block to list
+                    void* newFirstPtr = static_cast<char*>(freeSpace[indexSpace][0]) + size;
+                    freeSpace[indexSpace][0] = newFirstPtr;
+                    
 
+                    //FALTA ARREGLAR freeSpace[i]
+            
+                    std::stringstream ss;
+                    ss << "Create(" << size << ", " << type << ")\n";
+                    dumpFileReport(ss.str()); 
+            
+                    return memBlk.id;
 
                 }
 
@@ -348,9 +369,9 @@ class Manager {
                         ss << "DecreaseRefCount(" << id << ")\n";
                         dumpFileReport(ss.str());
 
+                        GarbageCollector();
                         return blks[i].refCount;
                     }
-
                     return 0; //Referencias menores que 1,
                 }
             }
@@ -426,26 +447,6 @@ class Manager {
             return changes;
         }
 
-        void MemoryDefragmentation() {
-
-            /* 
-            Create an array with size of blks.sizeof
-            foreach block in blks we add the ID to the list, in case, for example, the ID = 2 was deleted it will not appear on list
-            So we know that the space between blks[i-1].lastptr and blks[i+1].firstptr is available
-            Cases:
-                -ID = 1 not presented in array, we must take the inicial value of memory_amount blks[i+1].firstptr
-                -ID > 1, just use blks[i-1].lastptr and blks[i+1].firstptr
-            
-
-            void* ptr1 = reinterpret_cast<void*>(0x1);
-            void* ptr2 = reinterpret_cast<void*>(0x2);
-            freeSpace.push_back({ptr1, ptr2});
-            */
-
-            std::stringstream ss;
-            ss << "Memory Defragmentation...\n";
-            dumpFileReport(ss.str());
-        }
 };
 
 #endif

@@ -4,13 +4,23 @@
 void run() {
     Manager manager(10*1024*1024); // MB 
 
-    manager.ReceiveMessage("Create(2,int)");
-    manager.ReceiveMessage("Create(2,int)");
-    manager.ReceiveMessage("Set(2,1)");
-    manager.ReceiveMessage("IncreaseRefCount(1)");
-    manager.ReceiveMessage("DecreaseRefCount(1)");
-    manager.ReceiveMessage("Create(10,double)");
-    manager.ReceiveMessage("Create(10,char)");
+    manager.ReceiveMessage("Create(4,int)"); // id 1
+    manager.ReceiveMessage("Set(1,2)");
+
+
+    manager.ReceiveMessage("Create(100,int)"); // id 2
+    manager.ReceiveMessage("Set(2,27)");
+
+    manager.ReceiveMessage("Create(4,float)"); // id 3
+    manager.ReceiveMessage("Set(3,1.0)");
+
+    manager.ReceiveMessage("DecreaseRefCount(2)");
+
+    manager.ReceiveMessage("Create(2,char)"); // id 4
+    manager.ReceiveMessage("Set(4,a)");
+
+    manager.ReceiveMessage("Create(2,char)"); // id 5
+    manager.ReceiveMessage("Set(5,z)");
 
 }
 
