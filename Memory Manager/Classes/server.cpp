@@ -9,8 +9,6 @@
 #include "Bloque.h"
 #include "Manager.h"
 
-
-
 void RunGarbageCollector(Manager& Manager)
 {
     while (true)
@@ -18,7 +16,6 @@ void RunGarbageCollector(Manager& Manager)
         Manager.GarbageCollector();
         std::this_thread::sleep_for(std::chrono::seconds(10)); 
     }
-    
 }
 
 void handle_client(int client_socket, int client_number, Manager manager) {
@@ -86,7 +83,7 @@ int main() {
     std::cin >> folder;
 
     // Crear Ojeto manager para Memory Manager
-    Manager manager(additional_num * 1024 * 1024);
+    Manager manager(additional_num);
 
     // Crear el socket del servidor
     int server_socket = socket(AF_INET, SOCK_STREAM, 0);
