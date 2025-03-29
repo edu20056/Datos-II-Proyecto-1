@@ -9,8 +9,6 @@
 #include "Bloque.h"
 #include "Manager.h"
 
-
-
 void RunGarbageCollector(Manager& Manager)
 {
     while (true)
@@ -18,7 +16,6 @@ void RunGarbageCollector(Manager& Manager)
         Manager.GarbageCollector();
         std::this_thread::sleep_for(std::chrono::seconds(10)); 
     }
-    
 }
 
 void handle_client(int client_socket, int client_number, Manager manager) {
@@ -33,14 +30,10 @@ void handle_client(int client_socket, int client_number, Manager manager) {
                   << buffer << std::endl;
         
         // Enviar mensaje a manager y recibir respuesta
-        std::variant<int, float, std::string, char, bool, double> respuesta_manager = manager.ReceiveMessage(buffer);
+        std::variant<int, float, char, bool, double> respuesta_manager = manager.ReceiveMessage(buffer);
 
         std::string respuesta_str = std::visit([](auto&& arg) -> std::string {
-            if constexpr (std::is_same_v<std::decay_t<decltype(arg)>, std::string>) {
-                // Si el tipo es std::string, simplemente devolvemos el valor como está
-                return arg;
-            }
-            else if constexpr (std::is_same_v<std::decay_t<decltype(arg)>, char>) {
+                if constexpr (std::is_same_v<std::decay_t<decltype(arg)>, char>) {
                 // Si el tipo es char, verificamos si es un carácter ASCII imprimible
                 if (std::isprint(arg)) {
                     return std::string(1, arg);  // Convertir el char a un string
@@ -86,7 +79,7 @@ int main() {
     std::cin >> folder;
 
     // Crear Ojeto manager para Memory Manager
-    Manager manager(additional_num * 1024 * 1024);
+    Manager manager(additional_num);
 
     // Crear el socket del servidor
     int server_socket = socket(AF_INET, SOCK_STREAM, 0);
