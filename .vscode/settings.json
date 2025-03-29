@@ -51,6 +51,9 @@
         "streambuf": "cpp",
         "thread": "cpp",
         "typeinfo": "cpp",
-        "variant": "cpp"
+        "variant": "cpp",
+        "__split_buffer": "cpp",
+        "list": "cpp",
+        "sstream": "cpp"
     }
 }

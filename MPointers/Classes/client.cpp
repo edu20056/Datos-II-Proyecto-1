@@ -7,7 +7,6 @@
 int main() {
     std::string server_ip = "127.0.0.1";  // IP local para el servidor
     int server_port;
-
     std::cout << "Ingresa el puerto del servidor: ";
     std::cin >> server_port;
 
