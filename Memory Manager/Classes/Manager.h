@@ -71,7 +71,7 @@ class Manager {
                 dumpFile << "ID : " << block.id << '\n';
                 dumpFile << "  - First Address : " << block.frstPtr << '\n';
                 dumpFile << "  - Last Address : " << block.lastPtr << '\n';
-                dumpFile << "  - Size :spacio insuficiente, no se puede agregar el bloque " << (char*)block.lastPtr - (char*)block.frstPtr << '\n';
+                dumpFile << "  - Size : " << (char*)block.lastPtr - (char*)block.frstPtr << '\n';
                 dumpFile << "  - Type : " << block.type << '\n';
                 dumpFile << "  - Ref Count : " << block.refCount << '\n';
                 dumpFile << "-------------------------------------------\n\n";
