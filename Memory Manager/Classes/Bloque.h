@@ -14,6 +14,7 @@ struct MemoryBlock{
     int refCount;
     int id;
     string type;
+    bool alreadyAssigned;
 };
 
 

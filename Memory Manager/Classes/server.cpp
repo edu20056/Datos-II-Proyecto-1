@@ -19,7 +19,7 @@ void handle_client(int client_socket, int client_number, Manager manager) {
                   << buffer << std::endl;
         
         // Enviar mensaje a manager y recibir respuesta
-        std::variant<int, float, std::string> respuesta_manager = manager.ReceiveMessage(buffer);
+        std::variant<int, float, std::string, char, bool, double> respuesta_manager = manager.ReceiveMessage(buffer);
 
 
 
