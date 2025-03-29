@@ -22,14 +22,34 @@ class Manager {
 
     private:
 
-        int actuallID = 2;
+        int currentId;
         void* memory_amount;
         void* last_address;
         vector<MemoryBlock> blks; 
 
         std::string dumpDir;
+
+        std::string readableGetMethod(std::variant<int, float, char, bool, double> value) {
+            if (std::holds_alternative<int>(value)) {
+                return std::to_string(std::get<int>(value));
+            } 
+            if (std::holds_alternative<float>(value)) {
+                return std::to_string(std::get<float>(value));
+            } 
+            if (std::holds_alternative<double>(value)) {
+                return std::to_string(std::get<double>(value));
+            } 
+            if (std::holds_alternative<char>(value)) {
+                return std::string(1, std::get<char>(value));
+            } 
+            if (std::holds_alternative<bool>(value)) {
+                return std::get<bool>(value) ? "true" : "false";
+            }
+            
+            return "ID's value not found...";
+        }
         
-        std::string generateTimestamp() {
+        std::string generateTimestamp(const bool& flag) {
 
             // System Time
             auto now = std::chrono::system_clock::now();
@@ -37,12 +57,13 @@ class Manager {
             
             // Create string stream for timestamp
             std::stringstream ss;
-            ss << std::put_time(std::localtime(&time), "%Y%m%d_%H%M%S_");
+            ss << std::put_time(std::localtime(&time), 
+                flag ? "%Y%m%d_%H%M%S_" : "%m/%d/%Y %H:%M:%S ");
             
             // Add milliseconds
             auto duration = now.time_since_epoch();
             auto millis = std::chrono::duration_cast<std::chrono::milliseconds>(duration) % 1000;
-            ss << std::setfill('0') << std::setw(3) << millis.count() << ".dump";
+            ss << std::setfill('0') << std::setw(3) << millis.count() << (flag ? ".dump" : " -> ");
             
             return ss.str();
         }
@@ -55,8 +76,16 @@ class Manager {
             }
         
             // Generates File with TimeStamp as name
-            std::string filename = dumpDir + "/" + generateTimestamp();
+            std::string filename = dumpDir + "/" + generateTimestamp(true);
             std::ofstream dumpFile(filename);
+
+            size_t usedMemorySize = 0;
+            for (const MemoryBlock& block : blks) {
+                usedMemorySize += (char*)block.lastPtr - (char*)block.frstPtr;
+            }
+
+            double usagePorcentaje = static_cast<double>
+                (usedMemorySize) / ((char*)last_address - (char*)memory_amount) * 100;
         
             // Write memory information
             dumpFile << "\n========== MEMORY MANAGER REPORT ==========\n";
@@ -64,11 +93,12 @@ class Manager {
             dumpFile << "Last Address : " << last_address << " bytes\n";
             dumpFile << "Total Memory Size : " << 
                 (char*)last_address - (char*)memory_amount << " bytes\n";
+            dumpFile << "Allocated Memory : " << usedMemorySize << " bytes (" << usagePorcentaje << "%) \n";
             dumpFile << "-------------------------------------------\n\n";
 
-            dumpFile << "-------------------------------------------\n";
             for (const MemoryBlock block : blks) {
-                dumpFile << "ID : " << block.id << '\n';
+                dumpFile << "ID : " << block.id << 
+                    " ---------------------------- [ " << readableGetMethod(Get(block.id)) << " ]\n";
                 dumpFile << "  - First Address : " << block.frstPtr << '\n';
                 dumpFile << "  - Last Address : " << block.lastPtr << '\n';
                 dumpFile << "  - Size : " << (char*)block.lastPtr - (char*)block.frstPtr << '\n';
@@ -78,6 +108,7 @@ class Manager {
             }
 
             dumpFile << "---------- Operation Details -----------\n";
+            dumpFile << generateTimestamp(false); 
             dumpFile << input << '\n';
             dumpFile.close();
 
@@ -88,6 +119,8 @@ class Manager {
 
         Manager (int amount, std::string dir = "./Dump Folder") {
             memory_amount = malloc(amount);
+
+            currentId = 2;
 
             cout << "1st Adress: " << memory_amount << endl;
             last_address = (void*)((char*)memory_amount + amount);       
@@ -139,10 +172,10 @@ class Manager {
                 memBlk.frstPtr = nextMemoryUse; 
                 memBlk.lastPtr = (void*)((char*)memBlk.frstPtr + size); 
                 memBlk.refCount = 0;
-                memBlk.id = actuallID;
+                memBlk.id = currentId;
                 memBlk.type = type;
                 memBlk.alreadyAssigned = false;
-                actuallID++;
+                currentId++;
         
                 blks.push_back(memBlk); // Add block to list
         
@@ -155,7 +188,6 @@ class Manager {
         }
         
         int Set(int id, std::string value) {
-            cout << "Set llamado con id: " << id << " y value: " << value << endl;
         
             for (size_t i = 0; i < blks.size(); i++) {
                 if (blks[i].id == id) {
@@ -232,12 +264,14 @@ class Manager {
                         std::cerr << "Error: Tipo no soportado: " << blks[i].type << std::endl;
                         return -1;
                     }
+
+                    cout << "Set llamado con id: " << id << " y value: " << value << endl;
         
                     IncreaseRefCount(id);
                     blks[i].alreadyAssigned = true;
 
                     std::stringstream ss;
-                    ss << "Set(" << id << ")\n";
+                    ss << "Set(" << id << ", " << value << ")\n";
                     dumpFileReport(ss.str());
 
                     return 0; // success
