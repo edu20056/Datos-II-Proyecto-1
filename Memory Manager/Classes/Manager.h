@@ -193,29 +193,6 @@ class Manager {
                         *static_cast<double*>(ptr) = doubleValue;
                     }
 
-                    else if (blks[i].type == "string") {
-                        size_t sizeRequired = value.length() + 1; // +1 for string finished in 0
-                        std::string* strPtr = static_cast<std::string*>(ptr);
-                        if (sizeRequired > blockSize) {
-                            std::cerr << "Error: Tamaño insuficiente para el tipo string" << std::endl;
-                            return -3;
-                        }
-                        std::cout << "VALOR: " << value << std::endl;
-
-                        //Conversion to avoid errors
-                        std::string convertedValue = value;
-                        
-                        // Verify time compilation
-                        if (!std::is_same<std::string, decltype(*static_cast<std::string*>(ptr))>::value) {
-                            std::cerr << "Error: El puntero no apunta a un std::string válido." << std::endl;
-                            return -4;
-                        }
-
-                        // Asignation
-                        *static_cast<std::string*>(ptr) = convertedValue;
-                    }
-
-                    
                     else if (blks[i].type == "char") {
                         // Tamaño de un char
                         size_t sizeRequired = sizeof(char);
@@ -267,7 +244,7 @@ class Manager {
             return -1; // id not found
         }    
         
-        std::variant<int, float, std::string, char, bool, double> Get(int id) {
+        std::variant<int, float, char, bool, double> Get(int id) {
             for (size_t i = 0; i < blks.size(); i++) {
                 if (blks[i].id == id) {
                     void* ptr = blks[i].frstPtr;
@@ -286,9 +263,6 @@ class Manager {
                     }
                     else if (blks[i].type == "bool") {
                         return *(static_cast<bool*>(ptr));
-                    }
-                    else if (blks[i].type == "string") {
-                        return *(static_cast<std::string*>(ptr));
                     }
                 }
             }
@@ -332,7 +306,7 @@ class Manager {
             return -1;  // Si no se encuentra el ID, devuelve error
         }
 
-        std::variant<int, float, std::string, char, bool, double> ReceiveMessage(string message) { 
+        std::variant<int, float, char, bool, double> ReceiveMessage(string message) { 
             stringstream ss(message);
             string command;
             getline(ss, command, '(');
