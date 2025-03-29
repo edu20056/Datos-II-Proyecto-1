@@ -4,7 +4,7 @@
 
 #include "Bloque.h"
 #include <vector> // will be used to organize memory positions.
-
+#include <type_traits> // used for detecting strings
 #include <iostream>
 #include <sstream>
 #include <string>
@@ -192,15 +192,30 @@ class Manager {
                         double doubleValue = std::stod(value);
                         *static_cast<double*>(ptr) = doubleValue;
                     }
+
                     else if (blks[i].type == "string") {
-                        // Tamaño de un string (puede ser variable, así que necesitas compararlo con el espacio disponible)
-                        size_t sizeRequired = value.length() + 1; // +1 para el terminador nulo '\0'
+                        size_t sizeRequired = value.length() + 1; // +1 for string finished in 0
+                        std::string* strPtr = static_cast<std::string*>(ptr);
                         if (sizeRequired > blockSize) {
                             std::cerr << "Error: Tamaño insuficiente para el tipo string" << std::endl;
-                            return -3; // Error de tamaño insuficiente
+                            return -3;
                         }
-                        *static_cast<std::string*>(ptr) = value;
+                        std::cout << "VALOR: " << value << std::endl;
+
+                        //Conversion to avoid errors
+                        std::string convertedValue = value;
+                        
+                        // Verify time compilation
+                        if (!std::is_same<std::string, decltype(*static_cast<std::string*>(ptr))>::value) {
+                            std::cerr << "Error: El puntero no apunta a un std::string válido." << std::endl;
+                            return -4;
+                        }
+
+                        // Asignation
+                        *static_cast<std::string*>(ptr) = convertedValue;
                     }
+
+                    
                     else if (blks[i].type == "char") {
                         // Tamaño de un char
                         size_t sizeRequired = sizeof(char);
