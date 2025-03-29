@@ -19,7 +19,7 @@ private:
     void* last_address;
     vector<MemoryBlock> blks;    
 
-    int Create(int size, string type) { // falta restriccion que si size es mas peque que el valor minimo necesario para el type
+    int Create(int size, string type) { 
 
         if (blks.empty()){
             MemoryBlock memBlk;
@@ -62,36 +62,77 @@ private:
         }
     }
 
-    int Set(int id, std::string value) { //Revisar que value NO exceda el espacio designado para esta variable
+    int Set(int id, std::string value) {
         cout << "Set llamado con id: " << id << " y value: " << value << endl;
+    
         for (size_t i = 0; i < blks.size(); i++) {
             if (blks[i].id == id) {
                 void* ptr = blks[i].frstPtr;
-
+                void* ptrLast = blks[i].lastPtr;
+                
+                // Calculamos el tamaño del bloque de memoria disponible
+                size_t blockSize = static_cast<char*>(ptrLast) - static_cast<char*>(ptr);
+                
                 if (blks[i].type == "int") {
+                    // Tamaño de un int
+                    size_t sizeRequired = sizeof(int);
+                    if (sizeRequired > blockSize) {
+                        std::cerr << "Error: Tamaño insuficiente para el tipo int" << std::endl;
+                        return -3; // Error de tamaño insuficiente
+                    }
                     int intValue = std::stoi(value);
                     *static_cast<int*>(ptr) = intValue;
                 }
                 else if (blks[i].type == "float") {
+                    // Tamaño de un float
+                    size_t sizeRequired = sizeof(float);
+                    if (sizeRequired > blockSize) {
+                        std::cerr << "Error: Tamaño insuficiente para el tipo float" << std::endl;
+                        return -3; // Error de tamaño insuficiente
+                    }
                     float floatValue = std::stof(value);
                     *static_cast<float*>(ptr) = floatValue;
                 }
                 else if (blks[i].type == "double") {
+                    // Tamaño de un double
+                    size_t sizeRequired = sizeof(double);
+                    if (sizeRequired > blockSize) {
+                        std::cerr << "Error: Tamaño insuficiente para el tipo double" << std::endl;
+                        return -3; // Error de tamaño insuficiente
+                    }
                     double doubleValue = std::stod(value);
                     *static_cast<double*>(ptr) = doubleValue;
                 }
                 else if (blks[i].type == "string") {
+                    // Tamaño de un string (puede ser variable, así que necesitas compararlo con el espacio disponible)
+                    size_t sizeRequired = value.length() + 1; // +1 para el terminador nulo '\0'
+                    if (sizeRequired > blockSize) {
+                        std::cerr << "Error: Tamaño insuficiente para el tipo string" << std::endl;
+                        return -3; // Error de tamaño insuficiente
+                    }
                     *static_cast<std::string*>(ptr) = value;
                 }
                 else if (blks[i].type == "char") {
+                    // Tamaño de un char
+                    size_t sizeRequired = sizeof(char);
+                    if (sizeRequired > blockSize) {
+                        std::cerr << "Error: Tamaño insuficiente para el tipo char" << std::endl;
+                        return -3; // Error de tamaño insuficiente
+                    }
                     if (value.length() == 1) {
                         *static_cast<char*>(ptr) = value[0]; 
                     } else {
                         std::cerr << "Error: No se puede convertir a char (longitud > 1)" << std::endl;
-                        return -2; //caso de char con longitud mayor que 1
+                        return -2; // Error si longitud de char > 1
                     }
                 }
                 else if (blks[i].type == "bool") {
+                    // Tamaño de un bool
+                    size_t sizeRequired = sizeof(bool);
+                    if (sizeRequired > blockSize) {
+                        std::cerr << "Error: Tamaño insuficiente para el tipo bool" << std::endl;
+                        return -3; // Error de tamaño insuficiente
+                    }
                     if (value == "true") {
                         *static_cast<bool*>(ptr) = true;
                     } 
@@ -103,25 +144,20 @@ private:
                         return -1; // Retorna error si el valor no es "true" o "false"
                     }
                 }
-                
                 else {
                     std::cerr << "Error: Tipo no soportado: " << blks[i].type << std::endl;
                     return -1;
                 }
-                
-                
+    
                 IncreaseRefCount(id);
                 blks[i].alreadyAssigned = true;
                 return 0; // success
             }
         }
-
+    
         return -1; // id not found
     }
     
-    #include <variant>
-    #include <iostream>
-    #include <string>
     
     std::variant<int, float, std::string, char, bool, double> Get(int id) {
         for (size_t i = 0; i < blks.size(); i++) {

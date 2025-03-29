@@ -53,6 +53,7 @@
         "typeinfo": "cpp",
         "variant": "cpp",
         "__split_buffer": "cpp",
-        "list": "cpp"
+        "list": "cpp",
+        "sstream": "cpp"
     }
 }

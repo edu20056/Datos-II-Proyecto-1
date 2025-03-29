@@ -22,19 +22,28 @@ void handle_client(int client_socket, int client_number, Manager manager) {
         std::variant<int, float, std::string, char, bool, double> respuesta_manager = manager.ReceiveMessage(buffer);
 
 
-
         std::string respuesta_str = std::visit([](auto&& arg) -> std::string {
             if constexpr (std::is_same_v<std::decay_t<decltype(arg)>, std::string>) {
                 // Si el tipo es std::string, simplemente devolvemos el valor como está
                 return arg;
-            } else {
-                // Para tipos numéricos, usamos std::to_string
+            }
+            else if constexpr (std::is_same_v<std::decay_t<decltype(arg)>, char>) {
+                // Si el tipo es char, verificamos si es un carácter ASCII imprimible
+                if (std::isprint(arg)) {
+                    return std::string(1, arg);  // Convertir el char a un string
+                } else {
+                    return "[Non-printable ASCII]";  // Si no es imprimible
+                }
+            }
+            else {
+                // Para otros tipos numéricos, usamos std::to_string
                 return std::to_string(arg);
             }
         }, respuesta_manager);
+        
 
         // Responder al cliente con un mensaje de confirmación
-        std::string response = "Recibimos tu mensaje, Cliente " + std::to_string(client_number) + ", Ademas" + respuesta_str;
+        std::string response = "Recibimos tu mensaje, Cliente " + std::to_string(client_number) + ". Esta respuesta es: " + respuesta_str;
         send(client_socket, response.c_str(), response.length(), 0);
 
         // Limpiar el buffer para el próximo mensaje
