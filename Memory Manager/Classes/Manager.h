@@ -202,13 +202,13 @@ private:
     int DecreaseRefCount(int id) {
         for (size_t i = 0; i < blks.size(); i++) {
             if (blks[i].id == id) {
-                if ( blks[i].refCount != 0)
+                if ( blks[i].refCount > 0)
                 {
                     blks[i].refCount = blks[i].refCount - 1;
                     return blks[i].refCount;
                 }
 
-                return 0;
+                return 0; //Referencias menores que 1,
             }
         }
         return -1;  // Si no se encuentra el ID, devuelve error
@@ -277,6 +277,22 @@ public:
         cout << "Last Pointer Address: " << block.lastPtr << endl;
         cout << "Reference Count: " << block.refCount << endl;
         cout << "Type: " << block.type << endl;
+    }
+
+
+
+    bool GarbageCollector () // Boolean para que si es true cree un DumpFile
+    {
+        bool changes = false;
+        for (size_t i = 0; i < blks.size(); i++) {
+            if (blks[i].alreadyAssigned && blks[i].refCount <=0) //Si ya le fue asignado valor y tiene referencias cero
+            {
+                MemoryBlock toBeDeleted = blks[i];
+                blks.erase(blks.begin() + i);
+                changes = true;
+            }
+        }
+        return changes;
     }
 
 };
