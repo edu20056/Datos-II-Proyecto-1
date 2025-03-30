@@ -106,10 +106,6 @@ class Manager {
 
         int getHighestLastPtrID(const std::vector<MemoryBlock>& blks) { // Looks for the largest distanced element from the origin, so in case there are no
             // Empty spaces between blocks just takes lasptr from this ids block
-            if (blks.empty()) {
-                return -1; // Error, blks empty
-            }
-        
             int highestID = blks[0].id;
             void* highestLastPtr = blks[0].lastPtr;
         
@@ -119,11 +115,15 @@ class Manager {
                     highestID = block.id;
                 }
             }
-        
+            
             return highestID;
         }
 
         int findSufficientSpace(int size) {
+            if (freeSpace.size() == 0)
+            {
+                return -1;
+            }
             for (size_t i = 0; i < freeSpace.size(); ++i) {
                 void* ptr1 = freeSpace[i][0];
                 void* ptr2 = freeSpace[i][1];
@@ -159,10 +159,19 @@ class Manager {
             else {
                 int indexSpace = findSufficientSpace(size); 
                 if ( indexSpace < 0){
+                    cout << "CASITO -1" << endl;
                     MemoryBlock memBlk;
+                    MemoryBlock lastAdded;
                     int largeID = getHighestLastPtrID(blks);
-                    MemoryBlock lastAdded = blks[largeID - 1];
-                    void* nextMemoryUse = lastAdded.lastPtr; // La siguiente memoria empieza donde termina el último bloque
+                    for (int i = 0; i < blks.size(); i++){
+                        if (blks[i].id == largeID){
+                            lastAdded = blks[i];
+                            break;
+                        }
+
+                    }
+                    
+                    void* nextMemoryUse = static_cast<char*>(lastAdded.lastPtr);// La siguiente memoria empieza donde termina el último bloque
             
                     // Calcula la dirección final del nuevo bloque de memoria
                     void* endOfAllocation = (char*)nextMemoryUse + size;
@@ -190,8 +199,9 @@ class Manager {
                     return memBlk.id;
                 }
                 else{
+                    cout << "CASITO x con size: " << size<< endl;
                     MemoryBlock memBlk;
-                    memBlk.frstPtr = freeSpace[indexSpace][0]; 
+                    memBlk.frstPtr = static_cast<char*>(freeSpace[indexSpace][0]);
                     memBlk.lastPtr = (void*)((char*)memBlk.frstPtr + size); 
                     memBlk.id = actuallID;
                     memBlk.refCount = 0;
@@ -199,19 +209,30 @@ class Manager {
                     memBlk.alreadyAssigned = false;
                     actuallID++;
                     
-                    if ((char*)memBlk.lastPtr - (char*)memBlk.frstPtr == size) //if new blocks size is equals to freeSpace[i] space
+                    if ((char*)freeSpace[indexSpace][1] - (char*)freeSpace[indexSpace][0] == size) //if new blocks size is equals to freeSpace[i] space
                     {
                         freeSpace.erase(freeSpace.begin() + indexSpace);
+                        blks.push_back(memBlk); // Add block to list
+
                     }
-                    
 
-                    blks.push_back(memBlk); // Add block to list
-                    void* newFirstPtr = static_cast<char*>(freeSpace[indexSpace][0]) + size;
-                    freeSpace[indexSpace][0] = newFirstPtr;
-                    
+                    else{
 
-                    //FALTA ARREGLAR freeSpace[i]
-            
+                        blks.push_back(memBlk); // Add block to list
+
+                        void* newFirstPtr = static_cast<char*>(freeSpace[indexSpace][0]) + size;
+                        freeSpace[indexSpace][0] = newFirstPtr;
+                        
+                        // Calcular bytes restantes
+                        size_t remainingBytes = static_cast<char*>(freeSpace[indexSpace][1]) - static_cast<char*>(freeSpace[indexSpace][0]);
+                        // Mostrar en consola
+                        std::cout << "Bytes restantes en el bloque: " << remainingBytes << " bytes" << std::endl;
+
+
+                    }
+
+                    std::cout << "Espacios en freeSpace: " << freeSpace.size() << " bytes" << std::endl;
+
                     std::stringstream ss;
                     ss << "Create(" << size << ", " << type << ")\n";
                     dumpFileReport(ss.str()); 
