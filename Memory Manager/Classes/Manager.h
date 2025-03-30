@@ -115,6 +115,27 @@ class Manager {
             std::this_thread::sleep_for(std::chrono::milliseconds(50));
         }
 
+        void dumpFolderReset() {
+
+            try {
+
+                if (std::filesystem::exists(dumpDir) && std::filesystem::is_directory(dumpDir)) {
+
+                    cout << "XXXXXXXXXXXXXXXXXXXXXXXXXXXXX";
+
+                    // Iterate through all the files and directories within the folder
+                    std::filesystem::remove_all(dumpDir); 
+
+                    // Finally, remove the directory itself
+                    std::filesystem::remove(dumpDir);
+                }
+
+            } catch (const std::filesystem::filesystem_error& e) {
+
+                std::cerr << "Error while deleting directory: " << e.what() << '\n';
+            }
+        }
+
     public:
 
         Manager (int amount, std::string dir = "./Dump Folder") {
@@ -127,6 +148,8 @@ class Manager {
             cout << "Last Adress: " << last_address << endl;
 
             dumpDir = dir;
+            dumpFolderReset();
+            dumpFileReport("<Memory Initialized>");
         }
 
         ~Manager (){
