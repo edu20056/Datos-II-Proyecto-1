@@ -28,7 +28,7 @@ void handle_client(int client_socket, int client_number, Manager manager) {
     while ((read_size = recv(client_socket, buffer, sizeof(buffer), 0)) > 0) {
         std::cout << "Mensaje recibido de Cliente " << client_number << ": " 
                   << buffer << std::endl;
-        
+        std::cout << "buffer es: " << buffer << std::endl;
         // Enviar mensaje a manager y recibir respuesta
         std::variant<int, float, char, bool, double> respuesta_manager = manager.ReceiveMessage(buffer);
 
