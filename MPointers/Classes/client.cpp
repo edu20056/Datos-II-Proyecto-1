@@ -3,12 +3,16 @@
 #include <cstring>
 #include <unistd.h>
 #include <arpa/inet.h>
+#include <limits> // Necesario para std::numeric_limits
 
 int main() {
     std::string server_ip = "127.0.0.1";  // IP local para el servidor
     int server_port;
     std::cout << "Ingresa el puerto del servidor: ";
     std::cin >> server_port;
+
+    // Limpiar el buffer de entrada después de leer el número
+    std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
 
     // Crear el socket
     int sock = socket(AF_INET, SOCK_STREAM, 0);
@@ -36,8 +40,13 @@ int main() {
     std::string message;
     while (true) {
         std::cout << "Escribe un mensaje (o 'exit' para salir): ";
-        std::cin.ignore();  // Limpiar el buffer
         std::getline(std::cin, message);
+
+        if (message.empty()) {
+            continue;  // Evita enviar mensajes vacíos
+        }
+
+        std::cout << "Enviando: " << message << std::endl;
 
         if (message == "exit") {
             break;  // Salir del bucle si el mensaje es 'exit'
