@@ -9,7 +9,7 @@
 #include <sstream>
 #include <string>
 #include <vector>
-
+#include <array>
 #include <thread>  // Required for sleep_for
 #include <chrono>  // Required for milliseconds
 
@@ -26,6 +26,9 @@ class Manager {
         void* memory_amount;
         void* last_address;
         vector<MemoryBlock> blks; 
+        vector<std::array<void*, 2>> freeSpace; // it is a vector of arrays, they contain pointers like this 
+        //[0x1,0x4] meaning that the space is free in that location
+    
 
         std::string dumpDir;
         
@@ -101,6 +104,38 @@ class Manager {
             cout << "I AM FREE..." << endl;
         }
 
+        int getHighestLastPtrID(const std::vector<MemoryBlock>& blks) { // Looks for the largest distanced element from the origin, so in case there are no
+            // Empty spaces between blocks just takes lasptr from this ids block
+            int highestID = blks[0].id;
+            void* highestLastPtr = blks[0].lastPtr;
+        
+            for (const auto& block : blks) {
+                if (block.lastPtr > highestLastPtr) {
+                    highestLastPtr = block.lastPtr;
+                    highestID = block.id;
+                }
+            }
+            
+            return highestID;
+        }
+
+        int findSufficientSpace(int size) {
+            if (freeSpace.size() == 0)
+            {
+                return -1;
+            }
+            for (size_t i = 0; i < freeSpace.size(); ++i) {
+                void* ptr1 = freeSpace[i][0];
+                void* ptr2 = freeSpace[i][1];
+        
+                size_t byteDifference = static_cast<char*>(ptr2) - static_cast<char*>(ptr1);
+                if (byteDifference >= size) {
+                    return i; // Retorna el índice del bloque adecuado
+                }
+            }
+            return -1; // Retorna -1 si no hay un bloque con suficiente espacio
+        }
+
         int Create(int size, string type) { 
 
             // Verifica si la lista de bloques está vacía
@@ -122,35 +157,90 @@ class Manager {
                 return 1; 
             }
             else {
-                // Si ya hay bloques, toma el último bloque
-                MemoryBlock memBlk;
-                MemoryBlock lastAdded = blks.back();
-                void* nextMemoryUse = lastAdded.lastPtr; // La siguiente memoria empieza donde termina el último bloque
-        
-                // Calcula la dirección final del nuevo bloque de memoria
-                void* endOfAllocation = (char*)nextMemoryUse + size;
-        
-                if (endOfAllocation > last_address)
-                {
-                    return -2; // not enough space
+                int indexSpace = findSufficientSpace(size); 
+                if ( indexSpace < 0){
+                    cout << "CASITO -1" << endl;
+                    MemoryBlock memBlk;
+                    MemoryBlock lastAdded;
+                    int largeID = getHighestLastPtrID(blks);
+                    for (int i = 0; i < blks.size(); i++){
+                        if (blks[i].id == largeID){
+                            lastAdded = blks[i];
+                            break;
+                        }
+
+                    }
+                    
+                    void* nextMemoryUse = static_cast<char*>(lastAdded.lastPtr);// La siguiente memoria empieza donde termina el último bloque
+            
+                    // Calcula la dirección final del nuevo bloque de memoria
+                    void* endOfAllocation = (char*)nextMemoryUse + size;
+            
+                    if (endOfAllocation > last_address)
+                    {
+                        return -2; // not enough space
+                    }
+            
+                    // New memory block configuration
+                    memBlk.frstPtr = nextMemoryUse; 
+                    memBlk.lastPtr = (void*)((char*)memBlk.frstPtr + size); 
+                    memBlk.refCount = 0;
+                    memBlk.id = actuallID;
+                    memBlk.type = type;
+                    memBlk.alreadyAssigned = false;
+                    actuallID++;
+            
+                    blks.push_back(memBlk); // Add block to list
+            
+                    std::stringstream ss;
+                    ss << "Create(" << size << ", " << type << ")\n";
+                    dumpFileReport(ss.str()); 
+            
+                    return memBlk.id;
                 }
-        
-                // New memory block configuration
-                memBlk.frstPtr = nextMemoryUse; 
-                memBlk.lastPtr = (void*)((char*)memBlk.frstPtr + size); 
-                memBlk.refCount = 0;
-                memBlk.id = actuallID;
-                memBlk.type = type;
-                memBlk.alreadyAssigned = false;
-                actuallID++;
-        
-                blks.push_back(memBlk); // Add block to list
-        
-                std::stringstream ss;
-                ss << "Create(" << size << ", " << type << ")\n";
-                dumpFileReport(ss.str()); 
-        
-                return memBlk.id;
+                else{
+                    cout << "CASITO x con size: " << size<< endl;
+                    MemoryBlock memBlk;
+                    memBlk.frstPtr = static_cast<char*>(freeSpace[indexSpace][0]);
+                    memBlk.lastPtr = (void*)((char*)memBlk.frstPtr + size); 
+                    memBlk.id = actuallID;
+                    memBlk.refCount = 0;
+                    memBlk.type = type;
+                    memBlk.alreadyAssigned = false;
+                    actuallID++;
+                    
+                    if ((char*)freeSpace[indexSpace][1] - (char*)freeSpace[indexSpace][0] == size) //if new blocks size is equals to freeSpace[i] space
+                    {
+                        freeSpace.erase(freeSpace.begin() + indexSpace);
+                        blks.push_back(memBlk); // Add block to list
+
+                    }
+
+                    else{
+
+                        blks.push_back(memBlk); // Add block to list
+
+                        void* newFirstPtr = static_cast<char*>(freeSpace[indexSpace][0]) + size;
+                        freeSpace[indexSpace][0] = newFirstPtr;
+                        
+                        // Calcular bytes restantes
+                        size_t remainingBytes = static_cast<char*>(freeSpace[indexSpace][1]) - static_cast<char*>(freeSpace[indexSpace][0]);
+                        // Mostrar en consola
+                        std::cout << "Bytes restantes en el bloque: " << remainingBytes << " bytes" << std::endl;
+
+
+                    }
+
+                    std::cout << "Espacios en freeSpace: " << freeSpace.size() << " bytes" << std::endl;
+
+                    std::stringstream ss;
+                    ss << "Create(" << size << ", " << type << ")\n";
+                    dumpFileReport(ss.str()); 
+            
+                    return memBlk.id;
+
+                }
+
             }
         }
         
@@ -300,9 +390,9 @@ class Manager {
                         ss << "DecreaseRefCount(" << id << ")\n";
                         dumpFileReport(ss.str());
 
+                        GarbageCollector();
                         return blks[i].refCount;
                     }
-
                     return 0; //Referencias menores que 1,
                 }
             }
@@ -359,6 +449,13 @@ class Manager {
                 cout << "Bool de: " << blks[i].id << " Es: " << blks[i].alreadyAssigned << endl;
                 if (blks[i].alreadyAssigned && blks[i].refCount <= 0) {
                     cout << "Se está borrando el id: " << blks[i].id << endl;
+
+                    // Creates references for empty space
+                    void* ptr1 = blks[i].frstPtr;
+                    void* ptr2 = blks[i].lastPtr;
+                    std::array<void*, 2> newEntry = {ptr1, ptr2};
+                    freeSpace.push_back(newEntry);
+                    
                     blks.erase(blks.begin() + i);
                     changes = true;
 
@@ -371,21 +468,6 @@ class Manager {
             return changes;
         }
 
-        void MemoryDefragmentation() {
-
-            /* pseudo code...
-            void* lastAddress = memoryBlock; 
-            for (MemoryBlock* blk : allocatedMemory) {
-                blk->frstPtr= lastAddress;
-                blk->lastPtr= (void*)((char*)blk->frstPtr + blk->size - 1);
-                lastAddress = blk->lastPtr + 1;
-            }
-            */
-
-            std::stringstream ss;
-            ss << "Memory Defragmentation...\n";
-            dumpFileReport(ss.str());
-        }
 };
 
 #endif
