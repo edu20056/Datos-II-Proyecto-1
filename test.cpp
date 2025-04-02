@@ -3,7 +3,7 @@
 #include "MPointers/Classes/client.h"
 
 void run() {
-    Client cliente ("127.0.0.1", 5005);
+    Client cliente ("127.0.0.1", 50005);
     cliente.createConnection();
 
     string stringMessage = cliente.sendAndReceive("Create(10,int)");
@@ -42,15 +42,8 @@ void run() {
 
     manager.ReceiveMessage("Create(5,int)"); // id 6
     manager.ReceiveMessage("Set(6,27)");
-    
-    */
 
-    manager.ReceiveMessage("Create(4,int)"); 
-    manager.ReceiveMessage("Set(1,2)");
-}
-
-void newRun() {
-    MPointer<int>::Init(50000);
+        MPointer<int>::Init(50000);
         
     MPointer<int> ptr1;
     ptr1.New();
@@ -58,10 +51,15 @@ void newRun() {
     
     MPointer<int> ptr2 = ptr1;
     std::cout << "Value: " << *ptr2 << std::endl;
+    
+    */
+}
+
+void newRun() {
 }
 
 int main(){
-    newRun();
+    run();
     return 0;
 }
 

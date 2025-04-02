@@ -41,6 +41,7 @@ public:
         std::cout << "Conectado al servidor." << std::endl;
         return true;
     }
+    
     std::string sendAndReceive(const std::string& message) {
         if (send(sock, message.c_str(), message.size(), 0) < 0) {
             std::cerr << "Error al enviar mensaje." << std::endl;
