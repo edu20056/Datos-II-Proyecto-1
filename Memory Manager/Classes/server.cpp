@@ -49,8 +49,7 @@ void handle_client(int client_socket, int client_number, Manager manager) {
         
 
         // Responder al cliente con un mensaje de confirmación
-        std::string response = "Recibimos tu mensaje, Cliente " + std::to_string(client_number) + ". Esta respuesta es: " + respuesta_str;
-        send(client_socket, response.c_str(), response.length(), 0);
+        send(client_socket, respuesta_str.c_str(), respuesta_str.length(), 0);
 
         // Limpiar el buffer para el próximo mensaje
         memset(buffer, 0, sizeof(buffer));
@@ -79,7 +78,7 @@ int main() {
     std::cin >> folder;
 
     // Crear Ojeto manager para Memory Manager
-    Manager manager(additional_num);
+    Manager manager(additional_num* 1024* 1024);
 
     // Crear el socket del servidor
     int server_socket = socket(AF_INET, SOCK_STREAM, 0);

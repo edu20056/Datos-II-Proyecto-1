@@ -9,12 +9,12 @@
 using namespace std;
 
 struct MemoryBlock{
-    void* frstPtr;
-    void* lastPtr; 
-    int refCount;
-    int id;
-    string type;
-    bool alreadyAssigned;
+        void* frstPtr;
+        void* lastPtr; 
+        int refCount;
+        int id;
+        string type;
+        bool alreadyAssigned;
 };
 
 
