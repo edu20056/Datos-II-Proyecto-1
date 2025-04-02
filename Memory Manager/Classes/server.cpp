@@ -91,7 +91,7 @@ int main() {
     // Configurar la dirección del servidor
     sockaddr_in server_address;
     server_address.sin_family = AF_INET;
-    server_address.sin_port = htons(server_port);
+    server_address.sin_port = htons(50000);
     server_address.sin_addr.s_addr = inet_addr(server_ip.c_str());
 
     // Hacer bind del socket
