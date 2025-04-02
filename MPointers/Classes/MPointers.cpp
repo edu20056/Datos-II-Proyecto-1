@@ -1,5 +1,9 @@
 #include <iostream>
-#include <client.cpp>
+#include <string>
+#include <cstring>
+#include <unistd.h>
+#include <arpa/inet.h>
+#include <limits> // Necesario para std::numeric_limits
 
 template<typename T>
 class MPointer {

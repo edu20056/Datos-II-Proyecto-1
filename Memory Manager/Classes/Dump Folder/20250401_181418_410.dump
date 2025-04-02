@@ -1,0 +1,10 @@
+
+========== MEMORY MANAGER REPORT ==========
+Memory Start Address : 0x555555582ad0 bytes
+Last Address : 0x555555582ae4 bytes
+Total Memory Size : 20 bytes
+Allocated Memory : 0 bytes (0%) 
+-------------------------------------------
+
+---------- Operation Details -----------
+04/01/2025 18:14:18 411 -> <Memory Initialized>

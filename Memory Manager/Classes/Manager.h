@@ -28,8 +28,7 @@ class Manager {
         vector<MemoryBlock> blks; 
         vector<std::array<void*, 2>> freeSpace; // it is a vector of arrays, they contain pointers like this 
         //[0x1,0x4] meaning that the space is free in that location
-    
-
+        
         std::string dumpDir;
 
         std::string readableGetMethod(std::variant<int, float, char, bool, double> value) {
@@ -124,8 +123,6 @@ class Manager {
 
                 if (std::filesystem::exists(dumpDir) && std::filesystem::is_directory(dumpDir)) {
 
-                    cout << "XXXXXXXXXXXXXXXXXXXXXXXXXXXXX";
-
                     // Iterate through all the files and directories within the folder
                     std::filesystem::remove_all(dumpDir); 
 
@@ -157,7 +154,7 @@ class Manager {
 
         ~Manager (){
             free(memory_amount);
-            cout << "I AM FREE..." << endl;
+            cout << "<I AM FREE...>" << endl;
         }
 
         int getHighestLastPtrID(const std::vector<MemoryBlock>& blks) { // Looks for the largest distanced element from the origin, so in case there are no
@@ -176,6 +173,7 @@ class Manager {
         }
 
         int findSufficientSpace(int size) {
+
             if (freeSpace.size() == 0)
             {
                 return -1;
@@ -241,10 +239,10 @@ class Manager {
                     memBlk.frstPtr = nextMemoryUse; 
                     memBlk.lastPtr = (void*)((char*)memBlk.frstPtr + size); 
                     memBlk.refCount = 0;
-                    memBlk.id = actuallID;
+                    memBlk.id = currentId;
                     memBlk.type = type;
                     memBlk.alreadyAssigned = false;
-                    actuallID++;
+                    currentId++;
             
                     blks.push_back(memBlk); // Add block to list
             
@@ -259,11 +257,11 @@ class Manager {
                     MemoryBlock memBlk;
                     memBlk.frstPtr = static_cast<char*>(freeSpace[indexSpace][0]);
                     memBlk.lastPtr = (void*)((char*)memBlk.frstPtr + size); 
-                    memBlk.id = actuallID;
+                    memBlk.id = currentId;
                     memBlk.refCount = 0;
                     memBlk.type = type;
                     memBlk.alreadyAssigned = false;
-                    actuallID++;
+                    currentId++;
                     
                     if ((char*)freeSpace[indexSpace][1] - (char*)freeSpace[indexSpace][0] == size) //if new blocks size is equals to freeSpace[i] space
                     {
@@ -395,6 +393,7 @@ class Manager {
         }    
         
         std::variant<int, float, char, bool, double> Get(int id) {
+
             for (size_t i = 0; i < blks.size(); i++) {
                 if (blks[i].id == id) {
                     void* ptr = blks[i].frstPtr;
@@ -420,6 +419,7 @@ class Manager {
         }
 
         int IncreaseRefCount(int id) {
+
             cout << "Se llamo increase con id: "<< id << endl;
             for (size_t i = 0; i < blks.size(); i++) {
                 if (blks[i].id == id) {
@@ -436,6 +436,7 @@ class Manager {
         }
 
         int DecreaseRefCount(int id) {
+
             cout << "Se llamo decrease con id: "<< id << endl;
             for (size_t i = 0; i < blks.size(); i++) {
                 if (blks[i].id == id) {
@@ -456,7 +457,8 @@ class Manager {
             return -1;  // Si no se encuentra el ID, devuelve error
         }
 
-        std::variant<int, float, char, bool, double> ReceiveMessage(string message) { 
+        std::variant<int, float, char, bool, double> ReceiveMessage(string message) {
+
             stringstream ss(message);
             string command;
             getline(ss, command, '(');
@@ -498,8 +500,8 @@ class Manager {
             }
         }
 
-        bool GarbageCollector () // Boolean para que si es true cree un DumpFile
-        {
+        bool GarbageCollector () { // Boolean para que si es true cree un DumpFile
+        
             bool changes = false;
             cout << "Size de vector: " << blks.size() << endl;
             for (size_t i = blks.size(); i-- > 0; ) { // Recorrer de atrás hacia adelante
