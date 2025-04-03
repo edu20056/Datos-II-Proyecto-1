@@ -137,7 +137,7 @@ class Manager {
 
     public:
 
-        Manager (int amount, std::string dir = "./dump") {
+        Manager (int amount, std::string dir ) { //         Manager (int amount, std::string dir = "./dump") {
             memory_amount = malloc(amount);
 
             currentId = 2;
@@ -202,10 +202,11 @@ class Manager {
                 memBlk.alreadyAssigned = false;
         
                 blks.push_back(memBlk); // Agrega el primer bloque a la lista
-        
+
                 std::stringstream ss;
                 ss << "Create(" << size << ", " << type << ")\n";
                 dumpFileReport(ss.str()); // Imprime el informe
+                IncreaseRefCount(memBlk.id);
         
                 return 1; 
             }
@@ -244,10 +245,13 @@ class Manager {
                     currentId++;
             
                     blks.push_back(memBlk); // Add block to list
-            
+
+
                     std::stringstream ss;
                     ss << "Create(" << size << ", " << type << ")\n";
                     dumpFileReport(ss.str()); 
+
+                    IncreaseRefCount(memBlk.id);
             
                     return memBlk.id;
                 }
@@ -289,6 +293,7 @@ class Manager {
                     std::stringstream ss;
                     ss << "Create(" << size << ", " << type << ")\n";
                     dumpFileReport(ss.str()); 
+                    IncreaseRefCount(memBlk.id);
             
                     return memBlk.id;
 
@@ -377,7 +382,6 @@ class Manager {
 
                     cout << "Set llamado con id: " << id << " y value: " << value << endl;
         
-                    IncreaseRefCount(id);
                     blks[i].alreadyAssigned = true;
 
                     std::stringstream ss;

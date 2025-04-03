@@ -79,7 +79,7 @@ int main() {
     std::cin >> folder;
 
     // Crear Ojeto manager para Memory Manager
-    Manager manager(additional_num* 1024* 1024);
+    Manager manager(additional_num* 1024* 1024, folder);
 
     // Crear el socket del servidor
     int server_socket = socket(AF_INET, SOCK_STREAM, 0);
@@ -126,7 +126,7 @@ int main() {
                   << ntohs(client_address.sin_port) << std::endl;
 
         // Crear un hilo para manejar al cliente
-        std::thread client_thread(handle_client, client_socket, client_counter, std::ref(manager)); //int* ptr = &num (*ptr) 
+        std::thread client_thread(handle_client, client_socket, client_counter, std::ref(manager));
         client_thread.detach();  // Desprender el hilo para que se ejecute independientemente
 
         client_counter++;
