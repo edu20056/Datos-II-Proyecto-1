@@ -6,6 +6,7 @@
 #include <vector>
 #include <thread>
 #include <variant>
+#include <memory>
 #include "Bloque.h"
 #include "Manager.h"
 
@@ -18,7 +19,7 @@ void RunGarbageCollector(Manager& Manager)
     }
 }
 
-void handle_client(int client_socket, int client_number, Manager manager) {
+void handle_client(int client_socket, int client_number, Manager& manager) {
     char buffer[1024] = {0};
     int read_size;
     
@@ -125,7 +126,7 @@ int main() {
                   << ntohs(client_address.sin_port) << std::endl;
 
         // Crear un hilo para manejar al cliente
-        std::thread client_thread(handle_client, client_socket, client_counter, manager);
+        std::thread client_thread(handle_client, client_socket, client_counter, std::ref(manager)); //int* ptr = &num (*ptr) 
         client_thread.detach();  // Desprender el hilo para que se ejecute independientemente
 
         client_counter++;

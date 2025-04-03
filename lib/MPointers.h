@@ -151,15 +151,15 @@ public:
 
     MPointer& operator=(const MPointer& other) {
         if (this != &other) {
-            if (id != -1) {
-                sendAndReceive("IncreaseRefCount(" + std::to_string(id) + ")");
-            }
-            
+
+            sendAndReceive("IncreaseRefCount(" + std::to_string(other.id) + ")");
             id = other.id;
             
+            /*
             if (id != -1) {
-                sendAndReceive("DecreaseRefCount(" + std::to_string(id) + ")");
+                sendAndReceive("DecreaseRefCount(" + std::to_string(other) + ")");
             }
+                */
         }
         return *this;
     }
