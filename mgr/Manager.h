@@ -1,4 +1,3 @@
-// Manager.h
 #ifndef MANAGER_H
 #define MANAGER_H
 
@@ -22,17 +21,36 @@ class Manager {
 
     private:
 
-        int actuallID = 2;
+        int currentId;
         void* memory_amount;
         void* last_address;
         vector<MemoryBlock> blks; 
         vector<std::array<void*, 2>> freeSpace; // it is a vector of arrays, they contain pointers like this 
         //[0x1,0x4] meaning that the space is free in that location
-    
-
-        std::string dumpDir;
         
-        std::string generateTimestamp() {
+        std::string dumpDir;
+
+        std::string readableGetMethod(std::variant<int, float, char, bool, double> value) {
+            if (std::holds_alternative<int>(value)) {
+                return std::to_string(std::get<int>(value));
+            } 
+            if (std::holds_alternative<float>(value)) {
+                return std::to_string(std::get<float>(value));
+            } 
+            if (std::holds_alternative<double>(value)) {
+                return std::to_string(std::get<double>(value));
+            } 
+            if (std::holds_alternative<char>(value)) {
+                return std::string(1, std::get<char>(value));
+            } 
+            if (std::holds_alternative<bool>(value)) {
+                return std::get<bool>(value) ? "true" : "false";
+            }
+            
+            return "ID's value not found...";
+        }
+        
+        std::string generateTimestamp(const bool& flag) {
 
             // System Time
             auto now = std::chrono::system_clock::now();
@@ -40,12 +58,13 @@ class Manager {
             
             // Create string stream for timestamp
             std::stringstream ss;
-            ss << std::put_time(std::localtime(&time), "%Y%m%d_%H%M%S_");
+            ss << std::put_time(std::localtime(&time), 
+                flag ? "%Y%m%d_%H%M%S_" : "%m/%d/%Y %H:%M:%S ");
             
             // Add milliseconds
             auto duration = now.time_since_epoch();
             auto millis = std::chrono::duration_cast<std::chrono::milliseconds>(duration) % 1000;
-            ss << std::setfill('0') << std::setw(3) << millis.count() << ".dump";
+            ss << std::setfill('0') << std::setw(3) << millis.count() << (flag ? ".dump" : " -> ");
             
             return ss.str();
         }
@@ -58,8 +77,16 @@ class Manager {
             }
         
             // Generates File with TimeStamp as name
-            std::string filename = dumpDir + "/" + generateTimestamp();
+            std::string filename = dumpDir + "/" + generateTimestamp(true);
             std::ofstream dumpFile(filename);
+
+            size_t usedMemorySize = 0;
+            for (const MemoryBlock& block : blks) {
+                usedMemorySize += (char*)block.lastPtr - (char*)block.frstPtr;
+            }
+
+            double usagePorcentaje = static_cast<double>
+                (usedMemorySize) / ((char*)last_address - (char*)memory_amount) * 100;
         
             // Write memory information
             dumpFile << "\n========== MEMORY MANAGER REPORT ==========\n";
@@ -67,11 +94,12 @@ class Manager {
             dumpFile << "Last Address : " << last_address << " bytes\n";
             dumpFile << "Total Memory Size : " << 
                 (char*)last_address - (char*)memory_amount << " bytes\n";
+            dumpFile << "Allocated Memory : " << usedMemorySize << " bytes (" << usagePorcentaje << "%) \n";
             dumpFile << "-------------------------------------------\n\n";
 
-            dumpFile << "-------------------------------------------\n";
             for (const MemoryBlock block : blks) {
-                dumpFile << "ID : " << block.id << '\n';
+                dumpFile << "ID : " << block.id << 
+                    " ---------------------------- [ " << readableGetMethod(Get(block.id)) << " ]\n";
                 dumpFile << "  - First Address : " << block.frstPtr << '\n';
                 dumpFile << "  - Last Address : " << block.lastPtr << '\n';
                 dumpFile << "  - Size : " << (char*)block.lastPtr - (char*)block.frstPtr << '\n';
@@ -81,27 +109,51 @@ class Manager {
             }
 
             dumpFile << "---------- Operation Details -----------\n";
+            dumpFile << generateTimestamp(false); 
             dumpFile << input << '\n';
             dumpFile.close();
 
             std::this_thread::sleep_for(std::chrono::milliseconds(50));
         }
 
+        void dumpFolderReset() {
+
+            try {
+
+                if (std::filesystem::exists(dumpDir) && std::filesystem::is_directory(dumpDir)) {
+
+                    // Iterate through all the files and directories within the folder
+                    std::filesystem::remove_all(dumpDir); 
+
+                    // Finally, remove the directory itself
+                    std::filesystem::remove(dumpDir);
+                }
+
+            } catch (const std::filesystem::filesystem_error& e) {
+
+                std::cerr << "Error while deleting directory: " << e.what() << '\n';
+            }
+        }
+
     public:
 
-        Manager (int amount, std::string dir = "./Dump Folder") {
+        Manager (int amount, std::string dir = "./dump") {
             memory_amount = malloc(amount);
+
+            currentId = 2;
 
             cout << "1st Adress: " << memory_amount << endl;
             last_address = (void*)((char*)memory_amount + amount);       
             cout << "Last Adress: " << last_address << endl;
 
             dumpDir = dir;
+            dumpFolderReset();
+            dumpFileReport("<Memory Initialized>");
         }
 
         ~Manager (){
             free(memory_amount);
-            cout << "I AM FREE..." << endl;
+            cout << "<I AM FREE...>" << endl;
         }
 
         int getHighestLastPtrID(const std::vector<MemoryBlock>& blks) { // Looks for the largest distanced element from the origin, so in case there are no
@@ -120,6 +172,7 @@ class Manager {
         }
 
         int findSufficientSpace(int size) {
+
             if (freeSpace.size() == 0)
             {
                 return -1;
@@ -185,10 +238,10 @@ class Manager {
                     memBlk.frstPtr = nextMemoryUse; 
                     memBlk.lastPtr = (void*)((char*)memBlk.frstPtr + size); 
                     memBlk.refCount = 0;
-                    memBlk.id = actuallID;
+                    memBlk.id = currentId;
                     memBlk.type = type;
                     memBlk.alreadyAssigned = false;
-                    actuallID++;
+                    currentId++;
             
                     blks.push_back(memBlk); // Add block to list
             
@@ -203,11 +256,11 @@ class Manager {
                     MemoryBlock memBlk;
                     memBlk.frstPtr = static_cast<char*>(freeSpace[indexSpace][0]);
                     memBlk.lastPtr = (void*)((char*)memBlk.frstPtr + size); 
-                    memBlk.id = actuallID;
+                    memBlk.id = currentId;
                     memBlk.refCount = 0;
                     memBlk.type = type;
                     memBlk.alreadyAssigned = false;
-                    actuallID++;
+                    currentId++;
                     
                     if ((char*)freeSpace[indexSpace][1] - (char*)freeSpace[indexSpace][0] == size) //if new blocks size is equals to freeSpace[i] space
                     {
@@ -245,7 +298,6 @@ class Manager {
         }
         
         int Set(int id, std::string value) {
-            cout << "Set llamado con id: " << id << " y value: " << value << endl;
         
             for (size_t i = 0; i < blks.size(); i++) {
                 if (blks[i].id == id) {
@@ -322,12 +374,14 @@ class Manager {
                         std::cerr << "Error: Tipo no soportado: " << blks[i].type << std::endl;
                         return -1;
                     }
+
+                    cout << "Set llamado con id: " << id << " y value: " << value << endl;
         
                     IncreaseRefCount(id);
                     blks[i].alreadyAssigned = true;
 
                     std::stringstream ss;
-                    ss << "Set(" << id << ")\n";
+                    ss << "Set(" << id << ", " << value << ")\n";
                     dumpFileReport(ss.str());
 
                     return 0; // success
@@ -338,6 +392,7 @@ class Manager {
         }    
         
         std::variant<int, float, char, bool, double> Get(int id) {
+
             for (size_t i = 0; i < blks.size(); i++) {
                 if (blks[i].id == id) {
                     void* ptr = blks[i].frstPtr;
@@ -363,6 +418,7 @@ class Manager {
         }
 
         int IncreaseRefCount(int id) {
+
             cout << "Se llamo increase con id: "<< id << endl;
             for (size_t i = 0; i < blks.size(); i++) {
                 if (blks[i].id == id) {
@@ -379,6 +435,7 @@ class Manager {
         }
 
         int DecreaseRefCount(int id) {
+
             cout << "Se llamo decrease con id: "<< id << endl;
             for (size_t i = 0; i < blks.size(); i++) {
                 if (blks[i].id == id) {
@@ -399,7 +456,8 @@ class Manager {
             return -1;  // Si no se encuentra el ID, devuelve error
         }
 
-        std::variant<int, float, char, bool, double> ReceiveMessage(string message) { 
+        std::variant<int, float, char, bool, double> ReceiveMessage(string message) {
+
             stringstream ss(message);
             string command;
             getline(ss, command, '(');
@@ -441,8 +499,8 @@ class Manager {
             }
         }
 
-        bool GarbageCollector () // Boolean para que si es true cree un DumpFile
-        {
+        bool GarbageCollector () { // Boolean para que si es true cree un DumpFile
+        
             bool changes = false;
             cout << "Size de vector: " << blks.size() << endl;
             for (size_t i = blks.size(); i-- > 0; ) { // Recorrer de atrás hacia adelante
