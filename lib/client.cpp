@@ -18,8 +18,11 @@ int main(){
 
         // Integer type example
         MPointer<int> ptr_int = MPointer<int>::New();
-        ptr_int = 5;
+        *ptr_int = 5;
         std::cout << "ID PTR_INT = " << &ptr_int << "\n";
+
+        MPointer<int> ptr_int3 = MPointer<int>::New();
+        *ptr_int3 = 3;
 
         // Copy assignment for integer type
         MPointer<int> ptr_int2;
@@ -29,7 +32,7 @@ int main(){
 
         // Float type example
         MPointer<float> ptr_float = MPointer<float>::New();
-        ptr_float = 3.14f;
+        *ptr_float = 3.14f;
         std::cout << "ID PTR_FLOAT = " << &ptr_float << "\n";
 
     } catch (const std::exception& e) {

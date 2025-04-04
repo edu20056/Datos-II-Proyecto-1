@@ -10,6 +10,8 @@
 #include "Bloque.h"
 #include "Manager.h"
 
+// ./server -port 5005 -memsize 1 -dumpFolder ./dump
+
 void RunGarbageCollector(Manager& Manager)
 {
     while (true)
