@@ -1,84 +1,101 @@
 #ifndef LINKEDLIST_H
 #define LINKEDLIST_H
 
+#include "MPointers.h"
+
 // Code Adapted From [CodeSignal - Introduction to Linked Lists in C++]
 // (https://codesignal.com/learn/courses/fundamental-data-structures-linked-lists-in-cpp/lessons/introduction-to-linked-lists-in-cpp)
 
+
+template<typename T>
 class Node {
-    public:
-        int data;      // Node data
-        Node* next;    // Pointer to next node
     
-        Node(int data) : data(data), next(nullptr) {}  // Initialize node with data
+    public:
+        MPointer<T> data;      // Node data
+        MPointer<Node<T>> next;    // Pointer to next node
+    
+        Node() = default;
+
+        Node(T value) {   // Initialize node with data
+            data = MPointer<T>::New();
+            *data = value;
+            next = nullptr;
+        }  
     };
 
-        
+template<typename T>    
 class LinkedList {
+    
     private:
-        Node* head;    // Pointer to first node
+
+        MPointer<Node<T>> head;    // Pointer to first node
 
     public:
+
         LinkedList() : head(nullptr) {}  // Initialize empty list
 
-        ~LinkedList() {
-            Node* current = head;  // Start with the head node
+        void append(T value) {
+
+            // Create and initialize a new node
+            MPointer<Node<T>> newNode = MPointer<Node<T>>::New();
+            *newNode = Node<T>(value);
     
-            while (current != nullptr) {  // Iterate until the end of the list
-                Node* nextNode = current->next;  // Store the next node
-                delete current;  // Delete the current node
-                current = nextNode;  // Move to the next node
-            }
-        }
-
-        void append(int data) {
-            Node* node = new Node(data);  // Create new node
-            if (!head) {
-                head = node;  // Set head if list is empty
+            // If list is empty, make new node the head
+            if (head == nullptr) {
+                head = newNode;
             } else {
-                Node* last = head;
-                while (last->next) {
-                    last = last->next;  // Traverse to end
+                // Otherwise, traverse to the end and append the node
+                MPointer<Node<T>> current = head;
+                while ((*current).next != nullptr) {
+                    current = (*current).next;
                 }
-                last->next = node;  // Append new node
+                (*current).next = newNode;
             }
         }
 
-    void addFirst(int data) {
-        Node* node = new Node(data); // Create new node
+        void addFirst(T value) {
 
-        if (head != nullptr) {
-            node->next = head; // Link new node to the current head
+            // Create and initialize a new node
+            MPointer<Node<T>> newNode = MPointer<Node<T>>::New();
+            *newNode = Node<T>(value);
+
+            // Point the new node's next to current head
+            (*newNode).next = head;
+
+            // Update head to point to the new node
+            head = newNode;
         }
 
-        head = node; // Update head to new node
-    }
+        void deleteNode(T value) {
+            // If the list is empty, there's nothing to delete
+            if (head == nullptr) return;
 
-    void deleteNode(int data) {
-        if (head == nullptr) return;  // Check if list is empty
-
-        // Check if the head node is the one to be deleted
-
-        if (head->data == data) {
-            Node* temp = head;
-            head = head->next;  // Move head to the next node
-            delete temp;  // Free memory of the old head
-            return;
-        }
-
-        Node* current = head;
-
-        // Traverse the list to find the node to delete
-        while (current->next != nullptr) {
-            if (current->next->data == data) {
-                Node* temp = current->next;
-                current->next = current->next->next;  // Bypass the node to delete
-                delete temp;  // Free memory of the bypassed node
+            // If the head node holds the value, remove it
+            if (*((*head).data) == value) {
+                head = (*head).next;
                 return;
             }
 
-            current = current->next;  // Move to the next node
+            // Traverse the list to find the node before the one to delete
+            MPointer<Node<T>> current = head;
+            while ((*current).next != nullptr) {
+                if (*((*(*current).next).data) == value) {
+                    // Skip over the node to delete
+                    (*current).next = (*(*current).next).next;
+                    return;
+                }
+                current = (*current).next;
+            }
         }
-    }
+
+        void printList() {
+            MPointer<Node<T>> current = head;
+            while (current != nullptr) {
+                std::cout << *((*current).data) << " -> ";
+                current = (*current).next;
+            }
+            std::cout << "null" << std::endl;
+        }
 };
 
 #endif 
