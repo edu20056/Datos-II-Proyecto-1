@@ -66,20 +66,36 @@ void handle_client(int client_socket, int client_number, Manager& manager) {
     close(client_socket);
 }
 
-int main() {
-    std::string folder;
-    int server_port, additional_num;
+int main(int argc, char* argv[]) {
     std::string server_ip = "127.0.0.1";  // IP local para el servidor
+    std::string folder;
+    int server_port = 0;
+    int additional_num = 0;
 
-    std::cout << "Ingresa el puerto del servidor: ";
-    std::cin >> server_port;
-    std::cout << "Ingresa la cantidad de MB por reservar: ";
-    std::cin >> additional_num;
-    std::cout << "Ingresa la carpeta del servidor: ";
-    std::cin >> folder;
+    // Verificar que los argumentos son suficientes 
+    if (argc != 7) {
+        std::cerr << "Uso: ./server -port LISTEN_PORT -memsize SIZE_MB -dumpFolder DUMP_FOLDER\n";
+        return 1;
+    }
 
-    // Crear Ojeto manager para Memory Manager
-    Manager manager(additional_num* 1024* 1024, folder);
+    // Procesar argumentos
+    for (int i = 1; i < argc; i++) {
+        std::string arg = argv[i];
+
+        if (arg == "-port" && i + 1 < argc) {
+            server_port = std::stoi(argv[++i]);
+        } else if (arg == "-memsize" && i + 1 < argc) {
+            additional_num = std::stoi(argv[++i]);
+        } else if (arg == "-dumpFolder" && i + 1 < argc) {
+            folder = argv[++i];
+        } else {
+            std::cerr << "Argumento no válido: " << arg << std::endl;
+            return 1;
+        }
+    }
+
+    // Crear objeto Manager con los valores obtenidos
+    Manager manager(additional_num * 1024 * 1024, folder);
 
     // Crear el socket del servidor
     int server_socket = socket(AF_INET, SOCK_STREAM, 0);
