@@ -1,10 +1,10 @@
+#ifndef BLOQUE_H
+#define BLOQUE_H
+
 #include <variant>
 #include <string>
 #include <iostream>
 #include <vector>
-
-#ifndef BLOQUE_H
-#define BLOQUE_H
 
 using namespace std;
 
