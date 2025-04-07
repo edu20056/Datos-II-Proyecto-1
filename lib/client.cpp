@@ -3,10 +3,9 @@
 
 #include "MPointers.h"
 
-int main(){
+void test1() {
 
     try {
-
         // Initialize the MPointer system for each type
         MPointer<int>::Init("127.0.0.1", 5005);
         MPointer<float>::Init("127.0.0.1", 5005);
@@ -37,8 +36,50 @@ int main(){
 
     } catch (const std::exception& e) {
         std::cerr << "Error: " << e.what() << '\n';
-        return 1;
     }
+}
+
+void test2() {
+
+    MPointer<int>::Init("127.0.0.1", 5005);
+
+    // Create a linked list
+    LinkedList<int> list;
+
+    // Add elements
+    list.insertEnd(10);
+    list.insertEnd(20);
+    list.insertFront(5);
+    list.insertEnd(30);
+    
+    // Display the list
+    list.display();
+    
+    // Search for values
+    std::cout << "Searching for 20: " << (list.search(20) ? "Found" : "Not found") << std::endl;
+    std::cout << "Searching for 25: " << (list.search(25) ? "Found" : "Not found") << std::endl;
+    
+    // Delete a node
+    list.deleteNode(20);
+    
+    // Display the list after deletion
+    std::cout << "After deleting 20:" << std::endl;
+    list.display();
+    
+    // Get the size
+    std::cout << "List size: " << list.size() << std::endl;
+    
+    // Access by position
+    try {
+        std::cout << "Element at position 1: " << list.get(1) << std::endl;
+    } catch (const std::out_of_range& e) {
+        std::cout << "Error: " << e.what() << '\n';
+    }
+}
+
+int main(){
+
+    test2();
     
     return 0;
 }
