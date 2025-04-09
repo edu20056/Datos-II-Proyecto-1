@@ -212,8 +212,9 @@ class MPointer {
         MPointer& operator=(const MPointer& other) {
             if (this != &other && other.id != -1) {
 
-                // Increase Reference Count on the Server
+                // Increase & Decrease Reference Count on the Server
                 memoryManagerRequest("IncreaseRefCount(" + std::to_string(other.id) + ")");
+                memoryManagerRequest("DecreaseRefCount(" + std::to_string(id) + ")");
                 id = other.id;
             }
 

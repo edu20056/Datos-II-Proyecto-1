@@ -67,9 +67,6 @@ void AsignationTest() {
     try {
         std::cout << "\n=== Example of Assignment Between MPointers ===\n";
         
-        // Initialize the MPointer system
-        MPointer<int>::Init();
-        
         // Create two MPointers and assign initial values
         MPointer<int> a = MPointer<int>::New();
         *a = 100;
@@ -142,8 +139,8 @@ int main(){
         // TESTS...
 
         //BasicTest_int();
-        Test_MultipleTypes();
-        //AsignationTest();
+        //Test_MultipleTypes();
+        AsignationTest();
         //ErrorTest(); // Comment the <float> Init
 
 
