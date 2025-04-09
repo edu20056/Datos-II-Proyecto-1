@@ -138,10 +138,10 @@ int main(){
         
         // TESTS...
 
-        //BasicTest_int();
-        //Test_MultipleTypes();
+        BasicTest_int();
+        Test_MultipleTypes();
         AsignationTest();
-        //ErrorTest(); // Comment the <float> Init
+        ErrorTest(); // Comment the <float> Init
 
 
     } catch (const std::exception& e) {
