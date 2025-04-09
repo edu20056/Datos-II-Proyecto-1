@@ -18,6 +18,16 @@ template <typename T>
 class MPointer {
 
     private:
+        
+        // Accepted types
+        static_assert(
+            std::is_same_v<T, int> || 
+            std::is_same_v<T, float> || 
+            std::is_same_v<T, double> || 
+            std::is_same_v<T, char> || 
+            std::is_same_v<T, bool>,
+            "MPointer offers support to : int, float, double, char & bool");
+
 
         // Static Members Shared Across All MPointer Instances (Sockets-Related)
         static std::string server_ip; // IP address of the memory server
@@ -60,14 +70,14 @@ class MPointer {
             }
 
             if (send(sock, request.c_str(), request.size(), 0) < 0) {
-                throw std::runtime_error("Error Sending Request");
+                throw std::runtime_error("!Error Sending Request");
             }
 
             // Receive Response
             char buffer[1024] = {0};
             int read_size = recv(sock, buffer, sizeof(buffer), 0);
             if (read_size <= 0) {
-                throw std::runtime_error("Error receiving response");
+                throw std::runtime_error("!Error receiving response");
             }
 
             return std::string(buffer, read_size);
@@ -121,9 +131,18 @@ class MPointer {
                 try {
                     memoryManagerRequest("DecreaseRefCount(" + std::to_string(id) + ")");
 
+                    memoryManagerRequest("exit"); // Leaves Server
+
+                    if (sock >= 0) {
+                        close(sock);
+                        sock = -1;
+                    }
+
                 } catch (...) {
                     // Destructor Shouldn't Throw
                 }
+
+                initialized = false;
             }
         }
 
@@ -139,7 +158,7 @@ class MPointer {
             // Create socket
             sock = socket(AF_INET, SOCK_STREAM, 0);
             if (sock < 0) {
-                throw std::runtime_error("Error creating socket");
+                throw std::runtime_error("!Error creating socket");
             }
 
             // Configure server address
@@ -151,7 +170,7 @@ class MPointer {
             if (connect(sock, (struct sockaddr*)&server_address, sizeof(server_address)) < 0) {
                 close(sock);
                 sock = -1;
-                throw std::runtime_error("Error connecting to server");
+                throw std::runtime_error("!Error connecting to server");
             }
 
             initialized = true;
@@ -183,7 +202,11 @@ class MPointer {
         int operator&() { return id; } // Address-of operator - Returns the Memory Block ID
 
         // Dereference operator - Returns DereferenceData of MPoiner
-        DereferenceData operator*() { return DereferenceData(this); }
+        DereferenceData operator*() { 
+            if (id == -1) throw std::runtime_error("NULL MPtr");
+
+            return DereferenceData(this); 
+        }
 
         // Special Case : Assignment operator for MPointer-to-MPointer Assignment
         MPointer& operator=(const MPointer& other) {
