@@ -130,6 +130,7 @@ class MPointer {
             if (id != -1) { // When destroy if the MPointer was not Null, Reduce the Reference Count
                 try {
                     memoryManagerRequest("DecreaseRefCount(" + std::to_string(id) + ")");
+                    memoryManagerRequest("DecreaseRefCount(" + std::to_string(id) + ")");
 
                     memoryManagerRequest("exit"); // Leaves Server
 

@@ -125,6 +125,41 @@ void ErrorTest() {
     }
 }
 
+void DeFragTest_aux() {
+
+    try {      
+        // Create a new MPointer for double and initialize it with a value
+        MPointer<double> dob = MPointer<double>::New();
+        *dob = 27.43;
+        
+    } catch (const std::exception& e) {
+        std::cerr << "\nError: " << e.what() << std::endl;
+    }
+}
+
+void DeFragTest() {
+
+    try {
+
+        std::cout << "\n=== Test: Defragmentation (double) ===\n";
+        
+        // Create a new MPointer for int and initialize it with a value
+        MPointer<int> num = MPointer<int>::New();
+        *num = 15;
+
+        // Summon Auxilar Function
+        DeFragTest_aux();
+
+        // Create a new MPointer for char and initialize it with a value
+        MPointer<char> letter = MPointer<char>::New();
+        *letter = 'l';
+
+    } catch (const std::exception& e) {
+        std::cerr << "\nError: " << e.what() << std::endl;
+    }
+
+}
+
 int main(){
 
     try {
@@ -138,10 +173,11 @@ int main(){
         
         // TESTS...
 
-        BasicTest_int();
-        Test_MultipleTypes();
-        AsignationTest();
-        ErrorTest(); // Comment the <float> Init
+        // BasicTest_int();
+        // Test_MultipleTypes();
+        // AsignationTest();
+        // ErrorTest(); // Comment the <float> Init
+        // DeFragTest();
 
 
     } catch (const std::exception& e) {
